@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Page</title>
+</head>
+<body>
+    <h1>Test Order</h1>
+    <form id="test-order-form">
+        <label for="test-dropdown">Select Test:</label>
+        <select id="test-dropdown" name="test-dropdown"></select>
+        <button type="submit">Save</button>
+    </form>
+
+    <script>
+        // Fetch the test questions from the server
+        fetch('http://localhost:8080/test/questions')
+            .then(response => response.json())
+            .then(data => {
+                const testDropdown = document.getElementById('test-dropdown');
+                data.forEach(test => {
+                    const option = document.createElement('option');
+                    option.value = test.id;
+                    option.textContent = test.question;
+                    testDropdown.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+        // Handle form submission
+        const form = document.getElementById('test-order-form');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const selectedTestId = document.getElementById('test-dropdown').value;
+
+            // Perform the necessary logic to save the test order
+            // You can make a POST request to your backend API to save the test order
+
+            // Redirect to another page or show a success message
+            alert('Test order saved!');
+        });
+    </script>
+</body>
+</html>

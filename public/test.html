@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page</title>
+</head>
+<body>
+    <h1>Tests</h1>
+    <ul id="test-list"></ul>
+
+    <script>
+        // Fetch the test questions from the server
+        fetch('http://localhost:8080/test/questions')
+            .then(response => response.json())
+            .then(data => {
+                const testList = document.getElementById('test-list');
+                data.forEach(test => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = test.question;
+                    testList.appendChild(listItem);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    </script>
+</body>
+</html>

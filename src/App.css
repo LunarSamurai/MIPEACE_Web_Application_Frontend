@@ -1,0 +1,304 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Use min-height instead of height */
+  background-color: #282c34;
+  color: white;
+}
+
+.App-header {
+  padding: 5px;
+  font-size: 48px;
+}
+
+.App-logo {
+  height: 50%;
+  width: 50%;
+  pointer-events: none;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.center-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.spinning-logo {
+  animation: spin 2s linear infinite;
+  height: 80px; /* Adjust the height as needed */
+  width: 80px; /* Adjust the width as needed */
+}
+
+.triangle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background-color: rgb(8, 179, 236);
+  transform: skew(-20deg);
+  z-index: -1;
+}
+
+/* Everything below is pertaining to the signup portion of the web application*/
+
+.signup-container {
+  position: relative;
+  display: flex;
+  background-color: white;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.signin-image {
+  display: block;
+  margin: auto;
+  height: 50%;
+  width: 50%;
+  padding: 50px;
+  z-index: 1;
+}
+
+.Credentials-Req {
+  color: #000000; /* Set the color to red (#ff0000) */
+}
+
+.signup-form {
+  position: relative;
+  z-index: 2;
+  width: 300px;
+  padding: 20px;
+  padding-top: 0px;
+  background-color: #f7f7f7;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically */
+}
+
+
+.signup-form input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.signup-form button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.signup-form button:hover {
+  background-color: #0056b3;
+}
+
+.welcome-message {
+  margin-top: 20px;
+  color: #282c34;
+  font-size: 18px;
+}
+
+.nickname {
+  font-weight: bold;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+}
+
+
+/*Everything Below is pertaining to the hub area state of the web application*/
+
+.hub-area {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+.top-ribbon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #0091ff;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  
+}
+
+.ribbon-section {
+  display: flex;
+  align-items: center;
+}
+
+.mipeace {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+}
+
+.clickable-section {
+  margin-left: 20px;
+  cursor: pointer;
+  color: white;
+  z-index: 1;
+}
+
+.admin-button {
+  background-color: #dc3545;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/*Everything below is pertaining to the admin portion of the web application*/
+
+.admin-login-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+}
+
+.Admin-Req {
+  color: black;
+  size: 20px;
+  font-weight: bold;
+  margin-bottom: 50px;
+}
+
+.admin-image {
+  height: auto;
+  width: 50%;
+  display: block;
+  margin-bottom: 10px;
+  margin: 0 auto;
+}
+
+.admin-login-content {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+  gap: 20px;
+}
+
+.admin-login-form h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: -100px;
+}
+
+.admin-login-form input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.admin-login-form button {
+  padding: 20px 40px;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.admin-login-form button:hover {
+  background-color: #0056b3;
+}
+
+.admin-login-error-message{
+  color: red;
+}
+
+.admin-welcome-message{
+  margin-top: 20px;
+  color: #282c34;
+  font-size: 18px;
+}
+
+.admin-buttons {
+  font-size: 16px;
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  top: 3px;
+  left: 1240px;
+  right: 0;
+  padding: 5px;
+  z-index: 0;
+}
+
+.admin-buttons .clickable-section {
+  margin-right: 0px; /* Adjust the margin as needed */
+  background-color:#07cde7;
+  padding: 12px;
+  border-radius: 10px;
+  position: relative; /* Needed for positioning the line pseudo-element */
+}
+
+/* Media Query for responsiveness */
+@media screen and (max-width: 600px) {
+  .admin-login-content {
+    width: 90%;
+    padding: 20px;
+  }
+}
+
