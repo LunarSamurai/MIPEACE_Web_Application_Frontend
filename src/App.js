@@ -6,7 +6,6 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import TestWebpage from './TestWebpage.js';
 import AdminWebpage from './AdminWebpage.js';
 
-
 function App() {
   const [showSignup, setShowSignup] = useState(false);
   const [cacid, setCacID] = useState('');
@@ -26,6 +25,8 @@ function App() {
   const [adminLoginAttempts, setAdminLoginAttempts] = useState(0);
   const [adminButtonDisabled, setAdminButtonDisabled] = useState(false);
   const [showWelcomeAdminMessage, setShowWelcomeAdminMessage] = useState(false);
+  const [redirectToAdmin, setRedirectToAdmin] = useState(false);
+
 
   const MAX_LOGIN_ATTEMPTS = 5;
   const LOCKOUT_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
@@ -116,13 +117,15 @@ function App() {
   };
 
   const handleNewClick = () => {
-    
+    // Logic for handling "New" click
   };
+
   const handleUpdateClick = () => {
-    
+    setRedirectToAdmin(true);
   };
+
   const handleViewClick = () => {
-    
+    // Logic for handling "View" click
   };
 
   const handleAdminLoginSubmit = (event) => {
@@ -193,6 +196,9 @@ function App() {
   );
 
   const renderHubArea = () => (
+    if (redirectToAdmin) {
+      return <Redirect to="/admin" />;
+    }
     <div className={`hub-area ${isAdmin ? 'admin-mode' : ''}`}>
       <div className="top-ribbon">
         <div className="ribbon-section">
@@ -222,17 +228,16 @@ function App() {
       )}
       {isAdmin && !showWelcomeMessage && !showLogo && (
         <div className="admin-welcome-message">
-        Welcome Admin!
-        <div className="admin-buttons">  
-          <div className="clickable-section" onClick={handleNewClick}>New</div>
-          <div className="clickable-section" onClick={handleUpdateClick}>Update</div>
-          <div className="clickable-section" onClick={handleViewClick}>View</div>
-        </div>
+          Welcome Admin!
+          <div className="admin-buttons">
+            <div className="clickable-section" onClick={handleNewClick}>New</div>
+            <div className="clickable-section" onClick={handleUpdateClick}>Update</div>
+            <div className="clickable-section" onClick={handleViewClick}>View</div>
+          </div>
         </div>
       )}
     </div>
   );
-  
 
   const renderAdminLogin = () => (
     <div className="admin-login-container">
@@ -241,7 +246,7 @@ function App() {
           <img src={signInImage} alt="Sign In" className="admin-image" />
           <p className="Admin-Req"> Are you an admin?</p>
           {adminButtonDisabled && (
-          <p className="admin-login-error-message">Invalid credentials. Please try again later.</p>
+            <p className="admin-login-error-message">Invalid credentials. Please try again later.</p>
           )}
           <h2>Admin Login</h2>
           <input
@@ -296,10 +301,10 @@ function App() {
             {showAdminLogin && renderAdminLogin()}
           </Route>
           <Route path="/tests">
-            {TestWebpage}
+            <TestWebpage />
           </Route>
           <Route path="/admin">
-            {AdminWebpage}
+            <AdminWebpage />
           </Route>
         </Switch>
       </div>
