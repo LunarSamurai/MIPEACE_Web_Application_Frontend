@@ -212,6 +212,12 @@ function App() {
           <div className="clickable-section" onClick={handleAccountClick}>
             Account
           </div>
+          {isAdmin && !showWelcomeMessage && !showLogo && (
+          <div className="admin-buttons">
+            <div className="clickable-section" onClick={handleNewClick}>New</div>
+            <div className="clickable-section" onClick={handleUpdateClick}>Update</div>
+            <div className="clickable-section" onClick={handleViewClick}>View</div>
+          </div>)}
           <div className={`clickable-section admin-button ${adminButtonDisabled ? 'disabled' : ''}`} onClick={handleAdminClick}>
             Admin
           </div>
@@ -220,23 +226,15 @@ function App() {
       {showWelcomeMessage && !isAdmin && (
         <div className="welcome-message">
           Welcome, <span className="nickname">{firstName}</span>!
-        </div>
-      )}
+        </div>)}
       {!showWelcomeMessage && showLogo && (
         <div className="center-logo">
           <img src={logo} className="App-logo" alt="logo" />
-        </div>
-      )}
+        </div>)}
       {isAdmin && !showWelcomeMessage && !showLogo && (
-        <div className="admin-welcome-message">
-          Welcome Admin!
-          <div className="admin-buttons">
-            <div className="clickable-section" onClick={handleNewClick}>New</div>
-            <div className="clickable-section" onClick={handleUpdateClick}>Update</div>
-            <div className="clickable-section" onClick={handleViewClick}>View</div>
-          </div>
-        </div>
-      )}
+          <div className="admin-welcome-message">
+            Welcome Admin!
+          </div>)}
     </div>
     );
   };
