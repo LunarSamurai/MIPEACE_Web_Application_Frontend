@@ -64,6 +64,17 @@
   overflow: hidden;
 }
 
+.signup-container:after{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background-color: rgb(8, 179, 236);
+  transform: skew(-20deg);
+  z-index: 0;
+}
+
 .signin-image {
   display: block;
   margin: auto;
@@ -111,7 +122,7 @@
   cursor: pointer;
 }
 
-.signup-form button:hover {
+.signup-button:hover {
   background-color: #0056b3;
 }
 
@@ -183,10 +194,18 @@
   z-index: 1;
 }
 
+.clickable-section:hover {
+  color:#525966;
+}
+
 .admin-button {
   background-color: #dc3545;
   padding: 10px;
   border-radius: 5px;
+}
+
+.admin-button:hover {
+  background-color: #920513;
 }
 
 /*Everything below is pertaining to the admin portion of the web application*/
@@ -273,24 +292,24 @@
 
 .admin-buttons {
   font-size: 16px;
-  position: fixed;
+  position: relative;
   display: flex;
   flex-direction: row;
   justify-content: center;
-  align-items: center;
-  top: 3px;
-  left: 1240px;
-  right: 0;
+  align-items: flex;
   padding: 5px;
   z-index: 0;
 }
 
 .admin-buttons .clickable-section {
-  margin-right: 0px; /* Adjust the margin as needed */
-  background-color:#07cde7;
-  padding: 12px;
-  border-radius: 10px;
+  background-color: #dc3545;
+  padding: 10px;
+  border-radius: 5px;
   position: relative; /* Needed for positioning the line pseudo-element */
+}
+
+.admin-buttons .clickable-section:hover{
+  background-color: #920513;
 }
 
 /* Media Query for responsiveness */
