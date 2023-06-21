@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import logo from './brain-illustration-12-svgrepo-com.svg';
 import signInImage from './logo-big.png';
 import './App.css';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link, Redirect } from 'react-router-dom';
 import TestWebpage from './TestWebpage.js';
 import AdminWebpage from './AdminWebpage.js';
 
@@ -195,10 +195,11 @@ function App() {
     </div>
   );
 
-  const renderHubArea = () => (
+  const renderHubArea = () => {
     if (redirectToAdmin) {
       return <Redirect to="/admin" />;
     }
+    return(
     <div className={`hub-area ${isAdmin ? 'admin-mode' : ''}`}>
       <div className="top-ribbon">
         <div className="ribbon-section">
@@ -237,7 +238,8 @@ function App() {
         </div>
       )}
     </div>
-  );
+    );
+  };
 
   const renderAdminLogin = () => (
     <div className="admin-login-container">
@@ -248,7 +250,6 @@ function App() {
           {adminButtonDisabled && (
             <p className="admin-login-error-message">Invalid credentials. Please try again later.</p>
           )}
-          <h2>Admin Login</h2>
           <input
             type="text"
             placeholder="CAC ID"
