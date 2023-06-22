@@ -47,8 +47,8 @@
  ### Frontend Application
   - This application which is cloned from https://github.com/LunarSamurai/MIPEACE_Web_Application_Frontend.git
    - Is the application that is responsible for displaying the web server and web application on either the localhost:3000 or a public address (insert here)
-   - You have typical web application files such as the main and first page being stored within the App.js and modified using the App.css
-   - You also have the public facing Admin.html and Test.html (Updated 06/22/2023/)
+   - You have typical web application files such as the main (first webpage)'s logic and creation within the App.js and modified using the App.css
+   - You also have the public facing Admin.html and Test.html (Updated 06/22/2023)
    - Those files' logic are controlled using the AdminWebpage.js. TestWebpage.js
    - With their styling being controlled by and modified with Admin.css, Test.css
    - This application connects to the backend to send back user information and testing information which the logic for both will be found within the .js and .html files
@@ -58,7 +58,7 @@
    
 # Support
 
- - If you need contact me in regards to this project please reach out to josephcraig.business@gmail.com
+ - If you need to contact me in regards to this project please reach out to josephcraig.business@gmail.com
    - Thankyou for continuing development of this project. I hope I was able to provide enough documentation to get you going!
 
 
