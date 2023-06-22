@@ -1,6 +1,18 @@
 # MIPEACE (Multi Instance Psychological Evaluation, Administration, Collection, and Extraction) tool/platform/web application
  - Designed by Joseph Craig for the US Army Psychologocial Research Institute
+ - There are two repositories. Both must be Cloned and ran for the web application to be ran as expected.
+ - You must have: Database, Backend, Frontend
 
+## To Operate the Web Application
+ - Open the mysql database in workbench
+ - Connect to database (local user specific)
+ - Open the Backend in visual studio code (using java run the application)
+  - Wait for the console to show the (Server has started) output
+ - Open powershell in administrator mode in the (path/to/MIPEACE_Web_Application_Frontend)
+  - run ```npm start```
+ - Web Browser should auto populate with localhost:3000
+ - Run your tests!
+ - Code!
  
 # Grabbing this to work on it yourself
 
