@@ -4,7 +4,7 @@
 
 - You do not own this product, the users of the contributors do. 
 
-## If you want to download a copy and work on itself on your own machine you must complete the following steps:
+## If you want to download a copy and work on the project on your own machine you must complete the following steps:
 
  - Pre-requisite being that it is assumed you have visual studio code the most recent.
    - Having javascript and any other dependencies for coding for the code-base aswell. 
