@@ -24,7 +24,7 @@
    - You must create a table called (user) and database schema called (mipeace_db)
    - The table must have the fields (id = pk) (cacid, first_name, middle_name, last_name)
    - There is also another table but we will get to that later (please update me)
-   - You must created in your database the same name and table to have the same name
+   - You must have created in your database the same name and table to have the same name
    - You must also create a user (labuser) and the password as (123!@#ARIira18())
    - These are hard coded into the application.properties file, if you choose to change your schema requirments:
     - Please change the user and password in the applications.properties file within in the backend application.
