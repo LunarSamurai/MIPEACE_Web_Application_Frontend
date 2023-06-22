@@ -27,7 +27,7 @@
    - You must have created in your database the same name and table to have the same name
    - You must also create a user (labuser) and the password as (123!@#ARIira18())
    - These are hard coded into the application.properties file, if you choose to change your schema requirments:
-    - Please change the user and password in the applications.properties file within in the backend application.
+    - Please change the user and password in the applications.properties file within the backend application.
      
   ### Backend Application
    - This application which is cloned from https://github.com/LunarSamurai/MIPEACE_Web_Application_Backend.git
