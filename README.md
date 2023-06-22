@@ -4,7 +4,7 @@
 
 - You do not own this product, the users of the contributors do. 
 
-## When you want to download this copy and work on itself ony your own machine you must do somethings:
+## When you want to download this copy and work on itself on your own machine you must do somethings:
 
  - Pre-requisite being that it is assumed you have visual studio code the most recent.
    - Having javascript and any other dependencies for coding for the code-base aswell. 
