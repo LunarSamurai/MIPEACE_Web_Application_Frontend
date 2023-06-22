@@ -45,7 +45,7 @@
    - Port used is Localhost:8080
 
  ### Frontend Application
-  -This application which is cloned from https://github.com/LunarSamurai/MIPEACE_Web_Application_Frontend.git
+  - This application which is cloned from https://github.com/LunarSamurai/MIPEACE_Web_Application_Frontend.git
    - Is the application that is responsible for displaying the web server and web application on either the localhost:3000 or a public address (insert here)
    - You have typical web application files such as the main and first page being stored within the App.js and modified using the App.css
    - You also have the public facing Admin.html and Test.html (Updated 06/22/2023/)
