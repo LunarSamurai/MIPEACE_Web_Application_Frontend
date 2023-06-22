@@ -14,7 +14,7 @@
  - After this https://nodejs.org/en/download <-- Follow that link to install nodejs (can install anywhere)
  - Then you must open administrator powershell and locate the directory that you had clone the repo into, and inside this folder
  - Run ```npm install -g@latest```
- - After which please run the command ```npm install react-router-dom@5.2.0
+ - After which please run the command ```npm install react-router-dom@5.2.0```
  - Test by running the command ```npm start```
  - You should be able to edit this code! 
 
