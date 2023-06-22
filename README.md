@@ -9,7 +9,7 @@
  - Pre-requisite being that it is assumed you have visual studio code the most recent.
    - Having javascript and any other dependencies for coding for the code-base aswell. 
  - First you must clone this repo into your own folder
- - Delete the /package.json and the /package-lock.json [It will auto create when at later when you install npm]
+ - Delete the /package.json and the /package-lock.json [It will auto create later when you install npm]
  - Based on your HDD or SSD of choice, install nodist into that drive via the /Program Files
  - After this https://nodejs.org/en/download <-- Follow that link to install nodejs (can install anywhere
  - Then you must open administrator powershell and locate the directory that you had clone the repo into, and inside this folder
