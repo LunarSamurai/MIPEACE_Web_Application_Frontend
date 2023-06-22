@@ -26,10 +26,17 @@ function App() {
   const [adminButtonDisabled, setAdminButtonDisabled] = useState(false);
   const [showWelcomeAdminMessage, setShowWelcomeAdminMessage] = useState(false);
   const [redirectToAdmin, setRedirectToAdmin] = useState(false);
-
-
+  const [adminLoginError, setAdminLoginError] = useState(false);
   const MAX_LOGIN_ATTEMPTS = 5;
+  const [adminAttemptsLeft, setAdminAttemptsLeft] = useState(MAX_LOGIN_ATTEMPTS);
   const LOCKOUT_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+  const [showAdminLockoutMessage, setShowAdminLockoutMessage] = useState(false);
+  const [hasBeenToAdminWebpage, setHasBeenToAdminWebpage] =  useState(false);
+
+  useEffect(() => {
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    setIsAdmin(isAdmin);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -53,9 +60,11 @@ function App() {
   useEffect(() => {
     if (adminLoginAttempts >= MAX_LOGIN_ATTEMPTS) {
       setAdminButtonDisabled(true);
+      setShowAdminLogin(false);
       const lockoutTimer = setTimeout(() => {
         setAdminButtonDisabled(false);
         setAdminLoginAttempts(0);
+        setAdminAttemptsLeft(MAX_LOGIN_ATTEMPTS);
       }, LOCKOUT_DURATION);
       return () => clearTimeout(lockoutTimer);
     }
@@ -111,10 +120,17 @@ function App() {
   };
 
   const handleAdminClick = () => {
-    if (adminButtonDisabled) return;
+    if (adminButtonDisabled) {
+      setShowAdminLockoutMessage(true);
+      setTimeout(() => {
+        setShowAdminLockoutMessage(false);
+      }, 3000);
+      return;
+    }
     setShowAdminLogin(true);
     setShowLogo(false);
   };
+  
 
   const handleNewClick = () => {
     // Logic for handling "New" click
@@ -122,6 +138,8 @@ function App() {
 
   const handleUpdateClick = () => {
     setRedirectToAdmin(true);
+    setHasBeenToAdminWebpage(true);
+    
   };
 
   const handleViewClick = () => {
@@ -137,6 +155,9 @@ function App() {
       adminMiddleName === 'Research' &&
       adminLastName === 'Manager'
     ) {
+      // Save admin status in local storage
+      localStorage.setItem('isAdmin', 'true');
+
       setIsAdmin(true);
       setShowAdminLogin(false);
       setShowWelcomeAdminMessage(true);
@@ -144,10 +165,22 @@ function App() {
       setShowWelcomeMessage(false);
     } else {
       setAdminLoginAttempts((prevAttempts) => prevAttempts + 1);
-      setError('Invalid credentials. Please try again.');
-      setShowAdminLogin(false);
+      setAdminAttemptsLeft((prevAttemptsLeft) => prevAttemptsLeft - 1);
+      setAdminLoginError(true);
+      setShowAdminLogin(true);
+      setShowLogo(false);
     }
   };
+
+  useEffect(() => {
+    if (adminButtonDisabled) {
+      setShowAdminLockoutMessage(true);
+      const timer = setTimeout(() => {
+        setShowAdminLockoutMessage(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [adminButtonDisabled]);
 
   const renderSignupForm = () => (
     <div className="signup-container">
@@ -199,43 +232,54 @@ function App() {
     if (redirectToAdmin) {
       return <Redirect to="/admin" />;
     }
-    return(
-    <div className={`hub-area ${isAdmin ? 'admin-mode' : ''}`}>
-      <div className="top-ribbon">
-        <div className="ribbon-section">
-          <h1 className="mipeace">MIPEACE</h1>
+    return (
+      <div className={`hub-area ${isAdmin ? 'admin-mode' : ''}`}>
+        <div className="top-ribbon">
+          <div className="ribbon-section">
+            <h1 className="mipeace">MIPEACE</h1>
+          </div>
+          {showAdminLockoutMessage && (
+            <h1 className="admin-lockout-message">You have entered the wrong admin credentials. Please try again in 30 minutes.</h1>
+          )}
+          <div className="ribbon-section right-section">
+            <div className="clickable-section" onClick={handleTestClick}>
+              Test
+            </div>
+            <div className="clickable-section" onClick={handleAccountClick}>
+              Account
+            </div>
+            {isAdmin && !showWelcomeMessage && !showLogo && (
+              <div className="admin-buttons">
+                <div className="clickable-section" onClick={handleNewClick}>
+                  New
+                </div>
+                <div className="clickable-section" onClick={handleUpdateClick}>
+                  Update
+                </div>
+                <div className="clickable-section" onClick={handleViewClick}>
+                  View
+                </div>
+              </div>
+            )}
+            <div className={`clickable-section admin-button ${adminButtonDisabled ? 'disabled' : ''}`} onClick={handleAdminClick}>
+              Admin
+            </div>
+          </div>
         </div>
-        <div className="ribbon-section right-section">
-          <div className="clickable-section" onClick={handleTestClick}>
-            Test
+        {showWelcomeMessage && !isAdmin && (
+          <div className="welcome-message">
+            Welcome, <span className="nickname">{firstName}</span>!
           </div>
-          <div className="clickable-section" onClick={handleAccountClick}>
-            Account
+        )}
+        {!showWelcomeMessage && showLogo && (
+          <div className="center-logo">
+            <img src={logo} className="App-logo" alt="logo" />
           </div>
-          {isAdmin && !showWelcomeMessage && !showLogo && (
-          <div className="admin-buttons">
-            <div className="clickable-section" onClick={handleNewClick}>New</div>
-            <div className="clickable-section" onClick={handleUpdateClick}>Update</div>
-            <div className="clickable-section" onClick={handleViewClick}>View</div>
-          </div>)}
-          <div className={`clickable-section admin-button ${adminButtonDisabled ? 'disabled' : ''}`} onClick={handleAdminClick}>
-            Admin
-          </div>
-        </div>
+        )}
+        {isAdmin && !showWelcomeMessage && !showLogo && (
+          <div className="admin-welcome-message">Welcome Admin!</div>
+        )}
       </div>
-      {showWelcomeMessage && !isAdmin && (
-        <div className="welcome-message">
-          Welcome, <span className="nickname">{firstName}</span>!
-        </div>)}
-      {!showWelcomeMessage && showLogo && (
-        <div className="center-logo">
-          <img src={logo} className="App-logo" alt="logo" />
-        </div>)}
-      {isAdmin && !showWelcomeMessage && !showLogo && (
-          <div className="admin-welcome-message">
-            Welcome Admin!
-          </div>)}
-    </div>
     );
   };
 
@@ -245,8 +289,10 @@ function App() {
         <form className="admin-login-form" onSubmit={handleAdminLoginSubmit}>
           <img src={signInImage} alt="Sign In" className="admin-image" />
           <p className="Admin-Req"> Are you an admin?</p>
-          {adminButtonDisabled && (
-            <p className="admin-login-error-message">Invalid credentials. Please try again later.</p>
+          {adminLoginError && (
+            <p className="admin-login-error-message">
+              Incorrect Admin Credentials. Please try again. Attempts left: {adminAttemptsLeft}
+            </p>
           )}
           <input
             type="text"
@@ -303,7 +349,7 @@ function App() {
             <TestWebpage />
           </Route>
           <Route path="/admin">
-            <AdminWebpage />
+            {isAdmin && !hasBeenToAdminWebpage && (<AdminWebpage isAdmin={isAdmin} hasBeenToAdminWebpage={hasBeenToAdminWebpage} setHasBeenToAdminWebpage={setHasBeenToAdminWebpage}/>)}
           </Route>
         </Switch>
       </div>

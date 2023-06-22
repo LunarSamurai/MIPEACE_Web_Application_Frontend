@@ -143,6 +143,19 @@
 
 
 /*Everything Below is pertaining to the hub area state of the web application*/
+.admin-login-container {
+  /* ... other styles ... */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-lockout-message {
+  margin-left: 50px;
+  font-size: 20px;
+  text-align: center;
+}
+
 
 .hub-area {
   position: relative;

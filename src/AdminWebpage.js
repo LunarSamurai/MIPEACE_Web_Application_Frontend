@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import './Admin.css'; // Import the CSS file
+import { useHistory } from 'react-router-dom';
 
-function AdminPage({ handleReturnToHub }) {
+
+function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage }) {
+  const history = useHistory();
   const [tests, setTests] = useState([]);
   const [selectedTests, setSelectedTests] = useState([]);
   const [numOfTests, setNumOfTests] = useState(0);
@@ -10,6 +13,12 @@ function AdminPage({ handleReturnToHub }) {
   const [saveConfirmation, setSaveConfirmation] = useState(false);
 
   useEffect(() => {
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+  
+    if (!isAdmin) {
+      history.push('/'); // Redirect to home page if user is not an admin
+    }
+  
     // Fetch the tests from the server and update the 'tests' state
     fetch('http://localhost:8080/test/questions')
       .then((response) => response.json())
@@ -22,6 +31,7 @@ function AdminPage({ handleReturnToHub }) {
       })
       .catch((error) => console.error('Error:', error));
   }, []);
+  
 
   const handleTestSelection = (event, index) => {
     const updatedSelectedTests = [...selectedTests];
@@ -65,6 +75,13 @@ function AdminPage({ handleReturnToHub }) {
 
   const handleEditOrder = () => {
     setViewOrderMenu(false);
+  };
+
+  const handleReturnToHub = () => {
+    setHasBeenToAdminWebpage(false);
+    isAdmin = false;
+    history.push('/');
+    window.location.reload();
   };
 
   if (viewOrderMenu) {
