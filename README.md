@@ -1,6 +1,6 @@
 # Grabbing this to work on it yourself
 
-- Remember this was created by Joseph Craig for US Army Psychological Research Institute
+- Remember this was created by Joseph Craig for the US Army Psychological Research Institute
 
 - You do not own this product, the users of the contributors do. 
 
