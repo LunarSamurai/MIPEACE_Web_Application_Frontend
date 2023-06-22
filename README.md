@@ -1,5 +1,5 @@
 # MIPEACE (Multi Instance Psychological Evaluation, Administration, Collection, and Extraction) tool/platform/web application
- - Designed by Joseph Craig for the US Army Psychologocial Research Institute
+ - Designed by Joseph Craig for the US Army Psychological Research Institute
  - There are two repositories. Both must be Cloned and ran for the web application to be ran as expected.
  - Backend can be found here: https://github.com/LunarSamurai/MIPEACE_Web_Application_Frontend.git
  - Frontend can be found here: https://github.com/LunarSamurai/MIPEASE_Web_Application_Backend.git
