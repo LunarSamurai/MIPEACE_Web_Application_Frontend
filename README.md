@@ -1,3 +1,10 @@
+# Grabbing this to work on it yourself
+## When you want to download this copy and work on itself ony your own machine you must do somethings:
+
+
+
+# Below are all of the information pertaining to the basis of React JS
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
