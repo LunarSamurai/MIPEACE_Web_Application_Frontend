@@ -1,5 +1,5 @@
 # MIPEACE (Multi Instance Psychological Evaluation, Administration, Collection, and Extraction) tool/platform/web application
- ## Designed by Joseph Craig for the US Army Psychologocial Research Institute
+ - Designed by Joseph Craig for the US Army Psychologocial Research Institute
 
  
  # Grabbing this to work on it yourself
