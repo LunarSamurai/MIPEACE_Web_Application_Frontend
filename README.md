@@ -1,4 +1,9 @@
 # Grabbing this to work on it yourself
+
+-
+
+-
+
 ## When you want to download this copy and work on itself ony your own machine you must do somethings:
 
 
