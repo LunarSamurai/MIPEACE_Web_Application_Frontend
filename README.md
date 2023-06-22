@@ -1,12 +1,27 @@
 # Grabbing this to work on it yourself
 
--
+- Remember this was created by Joseph Craig for US Army Psychological Research Institute
 
--
+- You do not own this product, the users of the contributors do. 
 
 ## When you want to download this copy and work on itself ony your own machine you must do somethings:
 
+ - Pre-requisite being that it is assumed you have visual studio code the most recent.
+   - Having javascript and any other dependencies for coding for the code-base aswell. 
+ - First you must clone this repo into your own folder
+ - Delete the /package.json and the /package-lock.json [It will auto create when at later when you install npm]
+ - Based on your HDD or SSD of choice, install nodist into that drive via the /Program Files
+ - After this https://nodejs.org/en/download <-- Follow that link to install nodejs (can install anywhere
+ - Then you must open administrator powershell and locate the directory that you had clone the repo into, and inside this folder
+ - Run ```npm install -g@latest```
+ - After which please run the command ```npm install react-router-dom@5.2.0
+ - Test by running the command ```npm start```
+ - You should be able to edit this code! 
 
+## Understanding the Hiearchy
+  - You must create a table called (user) and database schema called (mipeace_db)
+  - The table must have the fields (id = pk) (cacid, first_name, middle_name, last_name)
+  -  
 
 # Below are all of the information pertaining to the basis of React JS
 
