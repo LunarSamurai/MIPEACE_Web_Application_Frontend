@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './Admin.css'; // Import the CSS file
 import { useHistory } from 'react-router-dom';
+import badPersonImage from "./bad_person.png";
 
-
-function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage }) {
+function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage, setIsAdmin }) {
   const history = useHistory();
   const [tests, setTests] = useState([]);
   const [selectedTests, setSelectedTests] = useState([]);
@@ -11,15 +11,15 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage })
   const [errorMessage, setErrorMessage] = useState('');
   const [viewOrderMenu, setViewOrderMenu] = useState(false);
   const [saveConfirmation, setSaveConfirmation] = useState(false);
+  const [showUnauthorized, setShowUnauthorized] = useState(false);
 
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
-  
     if (!isAdmin) {
-      history.push('/'); // Redirect to home page if user is not an admin
+      setIsAdmin(false);
+      return;
     }
-  
-    // Fetch the tests from the server and update the 'tests' state
+
     fetch('http://localhost:8080/test/questions')
       .then((response) => response.json())
       .then((data) => {
@@ -30,8 +30,19 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage })
         setTests(testsFromServer);
       })
       .catch((error) => console.error('Error:', error));
-  }, []);
-  
+  }, [history, setIsAdmin]);
+
+  useEffect(() => {
+    if (hasBeenToAdminWebpage && !isAdmin) {
+      setHasBeenToAdminWebpage(false);
+      history.push('/');
+    }
+  }, [hasBeenToAdminWebpage, isAdmin, history, setHasBeenToAdminWebpage]);
+
+  useEffect(() => {
+    const updatedSelectedTests = selectedTests.slice(0, numOfTests);
+    setSelectedTests(updatedSelectedTests);
+  }, [numOfTests]);
 
   const handleTestSelection = (event, index) => {
     const updatedSelectedTests = [...selectedTests];
@@ -41,9 +52,7 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage })
 
   const handleSaveOrder = (event) => {
     event.preventDefault();
-    // Logic for saving the test order
     console.log('Selected tests:', selectedTests);
-    // Make a POST request to your backend API to save the test order
     setSaveConfirmation(true);
   };
 
@@ -51,11 +60,6 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage })
     const value = parseInt(event.target.value);
     setNumOfTests(value);
   };
-
-  useEffect(() => {
-    const updatedSelectedTests = selectedTests.slice(0, numOfTests);
-    setSelectedTests(updatedSelectedTests);
-  }, [numOfTests]);
 
   const handleUpdateTests = () => {
     if (isNaN(numOfTests) || numOfTests === '') {
@@ -79,10 +83,38 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage })
 
   const handleReturnToHub = () => {
     setHasBeenToAdminWebpage(false);
-    isAdmin = false;
     history.push('/');
     window.location.reload();
+    localStorage.setItem('isAdmin', 'false');
+    setIsAdmin(false);
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowUnauthorized(true);
+    }, 2250);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!isAdmin) {
+    if (!showUnauthorized) {
+      return null;
+    } 
+
+    return (
+    <div className="back-ground">
+      <div className="unauthorized-wrapper">
+        <div className="unauthorized-container">
+          <h1>Unauthorized Access</h1>
+          <img src={badPersonImage} alt="Unauthorized-Access" className="unauthorized-access" />
+          <p>You are not authorized to access this page.</p>
+          <button className="uh-oh-wrong-place" onClick={handleReturnToHub}>Go Back</button>
+        </div>
+      </div>
+    </div>
+    );
+  }
 
   if (viewOrderMenu) {
     return (

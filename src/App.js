@@ -32,10 +32,13 @@ function App() {
   const LOCKOUT_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
   const [showAdminLockoutMessage, setShowAdminLockoutMessage] = useState(false);
   const [hasBeenToAdminWebpage, setHasBeenToAdminWebpage] =  useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    console.log("isAdmin from localStorage: ", isAdmin); // log to the console
     setIsAdmin(isAdmin);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -72,6 +75,7 @@ function App() {
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
+    setIsAdmin(false);
     // Check if first name is "admin"
     if (firstName.toLowerCase() === 'admin') {
       console.log('Invalid first name');
@@ -137,9 +141,9 @@ function App() {
   };
 
   const handleUpdateClick = () => {
+    console.log("Value of isAdmin:", isAdmin); // This line logs the value of isAdmin to the browser console
     setRedirectToAdmin(true);
     setHasBeenToAdminWebpage(true);
-    
   };
 
   const handleViewClick = () => {
@@ -349,7 +353,16 @@ function App() {
             <TestWebpage />
           </Route>
           <Route path="/admin">
-            {isAdmin && !hasBeenToAdminWebpage && (<AdminWebpage isAdmin={isAdmin} hasBeenToAdminWebpage={hasBeenToAdminWebpage} setHasBeenToAdminWebpage={setHasBeenToAdminWebpage}/>)}
+          {isLoading ? (
+              <div>Loading...</div>
+            ) : 
+                <AdminWebpage
+                  isAdmin={isAdmin}
+                  hasBeenToAdminWebpage={hasBeenToAdminWebpage}
+                  setHasBeenToAdminWebpage={setHasBeenToAdminWebpage}
+                  setIsAdmin={setIsAdmin} // Pass setIsAdmin as a prop
+                />
+                }
           </Route>
         </Switch>
       </div>

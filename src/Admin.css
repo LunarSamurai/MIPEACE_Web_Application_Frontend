@@ -3,96 +3,148 @@
   }
   
 .container {
-z-index: 1;
-max-width: 600px;
-margin: 0 auto;
-padding: 20px;
-background-color: #f8f9fa;
-border-radius: 8px;
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-position: relative; /* Add position relative for the X button positioning */
+    z-index: 1;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative; /* Add position relative for the X button positioning */
 }
 
 .TestOrderLabel {
-font-size: 24px;
-color: black;
-margin-bottom: 0px;
+    font-size: 24px;
+    color: black;
+    margin-bottom: 0px;
 }
 
 h2 {
-color: black;
-font-size: 10px;
-margin-top: 0px;
+    color: black;
+    font-size: 10px;
+    margin-top: 0px;
 }
 
 form {
-margin-top: 20px;
+    margin-top: 20px;
 }
 
 .form-label {
-color: black;
-padding: 10px;
-margin-bottom: 50px;
-font-weight: 600;
+    color: black;
+    padding: 10px;
+    margin-bottom: 50px;
+    font-weight: 600;
 }
 
 .form-select {
-padding: 8px 12px;
-border-radius: 4px;
-border: 1px solid #ced4da;
-width: 100%;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    width: 100%;
 }
 
 .btn {
-display: inline-block;
-padding: 8px 16px;
-font-size: 14px;
-font-weight: 600;
-border: none;
-border-radius: 4px;
-cursor: pointer;
-color: #ffffff;
-background-color: #007bff;
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #ffffff;
+    background-color: #007bff;
 }
 
 .btn-primary {
-padding: 10px;
-background-color: #007bff;
-margin-top: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    margin-top: 10px;
 }
 
 .btn-primary:hover {
-background-color: #0069d9;
+    background-color: #0069d9;
 }
 
 .btn-danger {
-position: absolute;
-top: 10px;
-right: 10px;
-padding: 6px;
-font-size: 20px;
-color: red;
-background-color: transparent;
-border: none;
-cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 6px;
+    font-size: 20px;
+    color: red;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
 }
 
 .btn-group {
-display: flex;
-justify-content: center;
-margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 
 .btn-group .btn {
-margin: 0 10px;
+    margin: 0 10px;
 }
 
 .button-wrapper {
-display: flex;
-justify-content: center;
-margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 
 .button-wrapper .btn {
-margin: 0 10px;
+    margin: 0 10px;
+}
+
+@keyframes blink{
+    0% {
+        background-color: red;
+    }
+    50%{
+        background-color: white;
+    }
+    100%{
+        background-color: red;
+    }
+}
+
+.back-ground{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: red;
+    animation: blink 1s infinite;
+}
+
+.unauthorized-wrapper{
+    text-align: center;
+}
+
+.unauthorized-container{
+    align-items: center;
+    justify-content: center;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative; /* Add position relative for the X button positioning */ 
+    z-index: 1;
+}
+.uh-oh-wrong-place{
+    border-radius: 5px;
+    background-color: red;
+    padding: 5px;
+}
+.uh-oh-wrong-place:hover{
+    background-color: rgb(167, 7, 7);
+}
+.unauthorized-access{
+    width: 40%;
+    height: auto;
+    padding: 10px;
 }
