@@ -31,8 +31,9 @@ function App() {
   const [adminAttemptsLeft, setAdminAttemptsLeft] = useState(MAX_LOGIN_ATTEMPTS);
   const LOCKOUT_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
   const [showAdminLockoutMessage, setShowAdminLockoutMessage] = useState(false);
-  const [hasBeenToAdminWebpage, setHasBeenToAdminWebpage] =  useState(false);
+  const [hasBeenToAdminWebpage, setHasBeenToAdminWebpage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedButton, setSelectedButton] = useState('');
 
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -73,6 +74,20 @@ function App() {
     }
   }, [adminLoginAttempts]);
 
+  useEffect(() => {
+    // Retrieve values from localStorage
+    const savedCacid = localStorage.getItem('cacid');
+    const savedFirstName = localStorage.getItem('firstName');
+    const savedMiddleName = localStorage.getItem('middleName');
+    const savedLastName = localStorage.getItem('lastName');
+
+    // Set the state variables with the retrieved values
+    setCacID(savedCacid || '');
+    setFirstName(savedFirstName || '');
+    setMiddleName(savedMiddleName || '');
+    setLastName(savedLastName || '');
+  }, []);
+
   const handleFormSubmit = (event) => {
     event.preventDefault();
     setIsAdmin(false);
@@ -83,6 +98,12 @@ function App() {
       // Display an error message or perform appropriate error handling
       return;
     }
+
+    // Save the values in localStorage
+    localStorage.setItem('cacid', cacid);
+    localStorage.setItem('firstName', firstName);
+    localStorage.setItem('middleName', middleName);
+    localStorage.setItem('lastName', lastName);
 
     // Create an object with the form data
     const formData = {
@@ -120,7 +141,9 @@ function App() {
   };
 
   const handleAccountClick = () => {
-    // Logic for handling "Account" click
+    setSelectedButton('account');
+    setShowLogo(false);
+
   };
 
   const handleAdminClick = () => {
@@ -243,13 +266,12 @@ function App() {
             <h1 className="mipeace">MIPEACE</h1>
           </div>
           {showAdminLockoutMessage && (
-            <h1 className="admin-lockout-message">You have entered the wrong admin credentials. Please try again in 30 minutes.</h1>
+            <h1 className="admin-lockout-message">
+              You have entered the wrong admin credentials. Please try again in 30 minutes.
+            </h1>
           )}
           <div className="ribbon-section right-section">
-            <div className="clickable-section" onClick={handleTestClick}>
-              Test
-            </div>
-            <div className="clickable-section" onClick={handleAccountClick}>
+            <div className={`ribbon-section ${selectedButton === 'account' ? 'selected' : ''}`} onClick={handleAccountClick}>
               Account
             </div>
             {isAdmin && !showWelcomeMessage && !showLogo && (
@@ -270,22 +292,37 @@ function App() {
             </div>
           </div>
         </div>
-        {showWelcomeMessage && !isAdmin && (
-          <div className="welcome-message">
-            Welcome, <span className="nickname">{firstName}</span>!
-          </div>
-        )}
-        {!showWelcomeMessage && showLogo && (
-          <div className="center-logo">
-            <img src={logo} className="App-logo" alt="logo" />
-          </div>
+        {selectedButton === '' && (
+          <>
+            {showWelcomeMessage && !isAdmin && (
+              <div className="welcome-message">
+                Welcome, <span className="nickname">{firstName}</span>!
+              </div>
+            )}
+            {!showWelcomeMessage && showLogo && (
+              <div className="center-logo">
+                <img src={logo} className="App-logo" alt="logo" />
+              </div>
+            )}
+          </>
         )}
         {isAdmin && !showWelcomeMessage && !showLogo && (
           <div className="admin-welcome-message">Welcome Admin!</div>
         )}
+        {selectedButton === 'account' && (
+          <div className="account-container">
+            <div className="account-info">
+              <p>CAC ID: {cacid}</p>
+              <p>First Name: {firstName}</p>
+              <p>Middle Name: {middleName}</p>
+              <p>Last Name: {lastName}</p>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
+  
 
   const renderAdminLogin = () => (
     <div className="admin-login-container">
@@ -355,14 +392,14 @@ function App() {
           <Route path="/admin">
           {isLoading ? (
               <div>Loading...</div>
-            ) : 
+            ) : (
                 <AdminWebpage
                   isAdmin={isAdmin}
                   hasBeenToAdminWebpage={hasBeenToAdminWebpage}
                   setHasBeenToAdminWebpage={setHasBeenToAdminWebpage}
                   setIsAdmin={setIsAdmin} // Pass setIsAdmin as a prop
                 />
-                }
+              )}
           </Route>
         </Switch>
       </div>

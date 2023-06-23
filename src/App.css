@@ -221,6 +221,23 @@
   background-color: #920513;
 }
 
+.selected {
+  border:10px solid #fff; /* Set the border properties */
+  background-color: #fff; /* Set the background color */
+  color: #000; /* Set the text color */
+  /* Add any additional styles you want for the selected button */
+}
+.selected::after{
+  content: '';
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: -2px;
+  right: -2px;
+  background-color: #fff;
+  z-index: -1;
+}
+
 /*Everything below is pertaining to the admin portion of the web application*/
 
 .admin-login-container {
