@@ -1,21 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import logo from './brain-illustration-12-svgrepo-com.svg';
 import signInImage from './logo-big.png';
 import './App.css';
 import { BrowserRouter as Router, Switch, Route, Link, Redirect } from 'react-router-dom';
 import TestWebpage from './TestWebpage.js';
 import AdminWebpage from './AdminWebpage.js';
+import defaultProfileImage from './defaultProfileImage.jpg';
+import defaultBannerImage from './defaultBannerImage.jpg';
 
 function App() {
+
+  //Sign up container
   const [showSignup, setShowSignup] = useState(false);
   const [cacid, setCacID] = useState('');
   const [firstName, setFirstName] = useState('');
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  //Hub Area Container
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
   const [showLogo, setShowLogo] = useState(true);
   const [error, setError] = useState('');
+
+  //Admin Login
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminCacid, setAdminCacid] = useState('');
@@ -33,7 +41,17 @@ function App() {
   const [showAdminLockoutMessage, setShowAdminLockoutMessage] = useState(false);
   const [hasBeenToAdminWebpage, setHasBeenToAdminWebpage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedButton, setSelectedButton] = useState('');
+
+  //Sub Area States
+  const [showAccountScreen, setAccountScreen] = useState(false);
+  const [showTestScreen, setTestScreen] =  useState(false);
+
+  // State variables for profile picture and banner image
+  const [profilePicture, setProfilePicture] = useState('');
+  const [bannerImage, setBannerImage] = useState('');
+  const bannerInputRef = useRef(null);
+  const profileInputRef = useRef(null);
+
 
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -49,17 +67,6 @@ function App() {
 
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (submitted && !isAdmin) {
-      const timer = setTimeout(() => {
-        setShowWelcomeMessage(false);
-        setShowLogo(true);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [submitted]);
 
   useEffect(() => {
     if (adminLoginAttempts >= MAX_LOGIN_ATTEMPTS) {
@@ -137,13 +144,50 @@ function App() {
   };
 
   const handleTestClick = () => {
-    // Logic for handling "Test" click
+    setTestScreen(true);
+    setShowWelcomeMessage(false);
+    setShowLogo(false);
   };
 
   const handleAccountClick = () => {
-    setSelectedButton('account');
+    setAccountScreen(true);
+    setShowWelcomeMessage(false);
+    setAccountScreen(true);
     setShowLogo(false);
+  };
 
+  const handleBannerImageChange = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const image = reader.result;
+        setBannerImage(image);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const handleProfilePictureChange = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const image = reader.result;
+        setProfilePicture(image);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const handleEditBannerClick = () => {
+    bannerInputRef.current.click();
+  };
+
+  const handleEditProfileClick = () => {
+    profileInputRef.current.click();
   };
 
   const handleAdminClick = () => {
@@ -157,7 +201,6 @@ function App() {
     setShowAdminLogin(true);
     setShowLogo(false);
   };
-  
 
   const handleNewClick = () => {
     // Logic for handling "New" click
@@ -175,28 +218,55 @@ function App() {
 
   const handleAdminLoginSubmit = (event) => {
     event.preventDefault();
-    // Check if the entered credentials match the admin credentials
-    if (
-      adminCacid === '0000000001' &&
-      adminFirstName === 'Admin' &&
-      adminMiddleName === 'Research' &&
-      adminLastName === 'Manager'
-    ) {
-      // Save admin status in local storage
-      localStorage.setItem('isAdmin', 'true');
 
-      setIsAdmin(true);
-      setShowAdminLogin(false);
-      setShowWelcomeAdminMessage(true);
-      setShowLogo(false);
-      setShowWelcomeMessage(false);
-    } else {
-      setAdminLoginAttempts((prevAttempts) => prevAttempts + 1);
-      setAdminAttemptsLeft((prevAttemptsLeft) => prevAttemptsLeft - 1);
-      setAdminLoginError(true);
-      setShowAdminLogin(true);
-      setShowLogo(false);
-    }
+    // Create an object with the form data
+
+    // Make an HTTP GET request to your backend API for retrieving admin data
+    fetch(`http://localhost:8080/api/admin-login?cacid=${adminCacid}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Response from backend:', data); // Print the response from the backend
+        if (data === 'Invalid admin credentials') {
+          console.log('Invalid admin credentials');
+          setAdminLoginError(true);
+        } else {
+          const { firstName, middleName, lastName } = data;
+          // Check if entered admin credentials match the retrieved admin data
+          if (
+            adminCacid === '0000000001' &&
+            firstName === adminFirstName &&
+            middleName === adminMiddleName &&
+            lastName === adminLastName
+          ) {
+            localStorage.setItem('isAdmin', 'true');
+            console.log('Admin login successful');
+            console.log('CAC ID: ', adminCacid);
+            console.log('First Name:', firstName);
+            console.log('Middle Name:', middleName);
+            console.log('Last Name:', lastName);
+            // Save admin status in local storage or state
+            // Here, we're using state to track the logged-in status
+            setAdminLoginError(false);
+            setIsAdmin(true);
+            setShowAdminLogin(false);
+            setShowWelcomeAdminMessage(true);
+            setShowLogo(false);
+            setShowWelcomeMessage(false);
+          } else {
+            setAdminLoginAttempts((prevAttempts) => prevAttempts + 1);
+            setAdminAttemptsLeft((prevAttemptsLeft) => prevAttemptsLeft - 1);
+            setShowAdminLogin(true);
+            setShowLogo(false);
+            setIsAdmin(false);
+            setAdminLoginError(true);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        // Handle any errors that occurred during the request
+        // Display an error message or perform appropriate error handling
+      });
   };
 
   useEffect(() => {
@@ -271,7 +341,10 @@ function App() {
             </h1>
           )}
           <div className="ribbon-section right-section">
-            <div className={`ribbon-section ${selectedButton === 'account' ? 'selected' : ''}`} onClick={handleAccountClick}>
+            <div className='test' onClick={handleTestClick}>
+              Test
+            </div>
+            <div className='account' onClick={handleAccountClick}>
               Account
             </div>
             {isAdmin && !showWelcomeMessage && !showLogo && (
@@ -292,37 +365,77 @@ function App() {
             </div>
           </div>
         </div>
-        {selectedButton === '' && (
-          <>
-            {showWelcomeMessage && !isAdmin && (
-              <div className="welcome-message">
-                Welcome, <span className="nickname">{firstName}</span>!
-              </div>
-            )}
-            {!showWelcomeMessage && showLogo && (
-              <div className="center-logo">
-                <img src={logo} className="App-logo" alt="logo" />
-              </div>
-            )}
-          </>
+        {showWelcomeMessage && !isAdmin && (
+          <div className="welcome-message">
+            Welcome, <span className="nickname">{firstName}</span>!
+          </div>
+        )}
+        {!showWelcomeMessage && showLogo && (
+          <div className="center-logo">
+            <img src={logo} className="App-logo" alt="logo" />
+          </div>
         )}
         {isAdmin && !showWelcomeMessage && !showLogo && (
           <div className="admin-welcome-message">Welcome Admin!</div>
         )}
-        {selectedButton === 'account' && (
+        {showAccountScreen && (
           <div className="account-container">
-            <div className="account-info">
-              <p>CAC ID: {cacid}</p>
-              <p>First Name: {firstName}</p>
-              <p>Middle Name: {middleName}</p>
-              <p>Last Name: {lastName}</p>
+            <div className="profile-section">
+              <div className="banner-section">
+                {bannerImage ? (
+                  <img src={bannerImage} alt="Banner" className="banner-image" />
+                ) : (
+                  <img src={defaultBannerImage} alt="Default Banner" className="default-banner" />
+                )}
+                <button className="edit-banner" onClick={handleEditBannerClick}>
+                  Edit
+                </button>
+              </div>
+            </div>
+            <div className="profile-divider-section">
+              <div className="profile-picture-section">
+                {profilePicture ? (
+                  <img src={profilePicture} alt="Profile" className="profile-image" />
+                ) : (
+                  <img src={defaultProfileImage} alt="Default Profile" className="default-profile" />
+                )}
+                <button className="edit-profile" onClick={handleEditProfileClick}>
+                  Edit Profile Picture
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleBannerImageChange}
+                  ref={bannerInputRef}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleProfilePictureChange}
+                  ref={profileInputRef}
+                />
+              </div>
+              <div className="account-details">
+                <div className="header">
+                  <h1 className="cac-id">CAC ID: {cacid}</h1>
+                </div>
+                <div className="name-details">
+                  <p>First Name: {firstName}</p>
+                  <p>Middle Name: {middleName}</p>
+                  <p>Last Name: {lastName}</p>
+                </div>
+                <div className="TestCompletion">
+                  <p>Tests that you have completed: {}</p>
+                </div>
+              </div>
             </div>
           </div>
         )}
       </div>
     );
   };
-  
 
   const renderAdminLogin = () => (
     <div className="admin-login-container">
