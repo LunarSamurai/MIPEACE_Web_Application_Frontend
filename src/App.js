@@ -58,6 +58,14 @@ function App() {
     console.log("isAdmin from localStorage: ", isAdmin); // log to the console
     setIsAdmin(isAdmin);
     setIsLoading(false);
+    if(sessionStorage.length > 0){
+      setShowSignup(false);
+      setShowLogo(false);
+      setSubmitted(true);
+    }else{
+      sessionStorage.clear();
+      localStorage.clear();
+    };
   }, []);
 
   useEffect(() => {
@@ -82,11 +90,11 @@ function App() {
   }, [adminLoginAttempts]);
 
   useEffect(() => {
-    // Retrieve values from localStorage
-    const savedCacid = localStorage.getItem('cacid');
-    const savedFirstName = localStorage.getItem('firstName');
-    const savedMiddleName = localStorage.getItem('middleName');
-    const savedLastName = localStorage.getItem('lastName');
+    // Retrieve values from SessionStorage
+    const savedCacid = sessionStorage.getItem('cacid');
+    const savedFirstName = sessionStorage.getItem('firstName');
+    const savedMiddleName = sessionStorage.getItem('middleName');
+    const savedLastName = sessionStorage.getItem('lastName');
 
     // Set the state variables with the retrieved values
     setCacID(savedCacid || '');
@@ -107,10 +115,10 @@ function App() {
     }
 
     // Save the values in localStorage
-    localStorage.setItem('cacid', cacid);
-    localStorage.setItem('firstName', firstName);
-    localStorage.setItem('middleName', middleName);
-    localStorage.setItem('lastName', lastName);
+    sessionStorage.setItem('cacid', cacid);
+    sessionStorage.setItem('firstName', firstName);
+    sessionStorage.setItem('middleName', middleName);
+    sessionStorage.setItem('lastName', lastName);
 
     // Create an object with the form data
     const formData = {
@@ -155,6 +163,11 @@ function App() {
     setAccountScreen(true);
     setShowLogo(false);
   };
+
+  const handleLogoutClick = () => {
+    sessionStorage.clear();
+    window.location.reload();
+  }
 
   const handleBannerImageChange = (e) => {
     const files = e.target.files;
@@ -346,6 +359,9 @@ function App() {
             </div>
             <div className='account' onClick={handleAccountClick}>
               Account
+            </div>
+            <div className='logout' onClick={handleLogoutClick}>
+              Logout
             </div>
             {isAdmin && !showWelcomeMessage && !showLogo && (
               <div className="admin-buttons">

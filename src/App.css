@@ -144,9 +144,8 @@
 
 /*Everything Below is pertaining to the hub area state of the web application*/
 .account{
-  margin-right: 10px;
+  margin-right: 1 0px;
 }
-
 .account:hover {
   border:10px solid #fff; /* Set the border properties */
   background-color: #fff; /* Set the background color */
@@ -421,6 +420,19 @@
   align-items: center;
   cursor: pointer;
 }
+
+.logout{
+  margin-left: 10px;
+}
+
+.logout:hover{
+  border:10px solid #fff; /* Set the border properties */
+  background-color: #fff; /* Set the background color */
+  color: #000; /* Set the text color */
+  border-radius: 5px;
+  align-items: center;
+  cursor: pointer;
+}
 /*Everything below is pertaining to the admin portion of the web application*/
 
 .admin-login-container {
@@ -510,7 +522,6 @@
   flex-direction: row;
   justify-content: center;
   align-items: flex;
-  padding: 5px;
   z-index: 0;
 }
 

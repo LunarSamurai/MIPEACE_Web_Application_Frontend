@@ -53,9 +53,52 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage, s
   const handleSaveOrder = (event) => {
     event.preventDefault();
     console.log('Selected tests:', selectedTests);
-    setSaveConfirmation(true);
+  
+    // Delete all test orders
+    fetch('http://localhost:8080/api/test-order', {
+      method: 'DELETE',
+    })
+      .then((response) => {
+        if (response.ok) {
+          console.log('All test orders deleted successfully');
+          // Proceed with saving the new test orders
+          const newArrayList = selectedTests.map((selectedTest, index) => ({
+            testOrderNumber: index + 1,
+            textFileName: selectedTest,
+          }));
+  
+          console.log('New ArrayList:', newArrayList);
+  
+          newArrayList.forEach((item) => {
+            const { testOrderNumber, textFileName } = item;
+            const payload = {
+              testOrderNumber,
+              textFileName,
+            };
+  
+            console.log('Save order payload:', payload);
+  
+            fetch('http://localhost:8080/api/test-order', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(payload),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                console.log('Save order response:', data);
+                // Handle the response for each individual item here
+              })
+              .catch((error) => console.error('Error:', error));
+          });
+        } else {
+          console.error('Failed to delete test orders');
+        }
+      })
+      .catch((error) => console.error('Error:', error));
   };
-
+    
   const handleUpdateNumOfTests = (event) => {
     const value = parseInt(event.target.value);
     setNumOfTests(value);
@@ -103,16 +146,16 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage, s
     } 
 
     return (
-    <div className="back-ground">
-      <div className="unauthorized-wrapper">
-        <div className="unauthorized-container">
-          <h1>Unauthorized Access</h1>
-          <img src={badPersonImage} alt="Unauthorized-Access" className="unauthorized-access" />
-          <p>You are not authorized to access this page.</p>
-          <button className="uh-oh-wrong-place" onClick={handleReturnToHub}>Go Back</button>
+      <div className="back-ground">
+        <div className="unauthorized-wrapper">
+          <div className="unauthorized-container">
+            <h1>Unauthorized Access</h1>
+            <img src={badPersonImage} alt="Unauthorized-Access" className="unauthorized-access" />
+            <p>You are not authorized to access this page.</p>
+            <button className="uh-oh-wrong-place" onClick={handleReturnToHub}>Go Back</button>
+          </div>
         </div>
       </div>
-    </div>
     );
   }
 
@@ -179,7 +222,7 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage, s
           </button>
         </div>
         <div className="btn-group">
-          <button className="btn btn-primary" onClick={handleSaveOrder}>
+          <button className="btn btn-primary" type="submit">
             Save Order
           </button>
           <button className="btn btn-primary" onClick={handleViewOrder}>
@@ -199,3 +242,4 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage, s
 }
 
 export default AdminPage;
+
