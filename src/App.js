@@ -7,6 +7,7 @@ import TestWebpage from './TestWebpage.js';
 import AdminWebpage from './AdminWebpage.js';
 import defaultProfileImage from './defaultProfileImage.jpg';
 import defaultBannerImage from './defaultBannerImage.jpg';
+import { redirect } from 'react-router';
 
 function App() {
 
@@ -51,6 +52,11 @@ function App() {
   const [bannerImage, setBannerImage] = useState('');
   const bannerInputRef = useRef(null);
   const profileInputRef = useRef(null);
+
+  // Take Test container
+  const [showTakeTest, setShowTakeTest] = useState(false);
+  const [testOrders, setTestOrders] = useState([]);
+  const [redirectToTest, setRedirectToTest] = useState(false); // State variable for redirection
 
 
   useEffect(() => {
@@ -152,15 +158,40 @@ function App() {
   };
 
   const handleTestClick = () => {
-    setTestScreen(true);
-    setShowWelcomeMessage(false);
-    setShowLogo(false);
+    fetch('http://localhost:8080/api/get-test-order', {
+      method: 'GET'
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Ensure data is an array before sorting
+        const testOrdersArray = Array.isArray(data) ? data : [];
+
+        // Sort the entries by test_order_number
+        const sortedTestOrders = testOrdersArray.sort((a, b) => a.test_order_number - b.test_order_number);
+        // Print the sorted test orders to the console
+        console.log(sortedTestOrders);
+  
+        setTestScreen(true);
+        setShowTakeTest(true);
+        setAccountScreen(false);
+        setShowWelcomeMessage(false);
+        setShowLogo(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        // Handle any errors that occurred during the request
+        // Display an error message or perform appropriate error handling
+      });
   };
+  
+  const handleTakeTestButton = () => {
+      setRedirectToTest(true);
+  }
 
   const handleAccountClick = () => {
     setAccountScreen(true);
     setShowWelcomeMessage(false);
-    setAccountScreen(true);
+    setShowTakeTest(false);
     setShowLogo(false);
   };
 
@@ -342,6 +373,10 @@ function App() {
     if (redirectToAdmin) {
       return <Redirect to="/admin" />;
     }
+    if (redirectToTest){
+      return <Redirect to="/test/" />
+    }
+    const sortedTestOrders = testOrders.sort((a, b) => a.test_order_number - b.test_order_number);
     return (
       <div className={`hub-area ${isAdmin ? 'admin-mode' : ''}`}>
         <div className="top-ribbon">
@@ -393,6 +428,31 @@ function App() {
         )}
         {isAdmin && !showWelcomeMessage && !showLogo && (
           <div className="admin-welcome-message">Welcome Admin!</div>
+        )}
+        {showTakeTest && !isAdmin &&(
+          <div className="take-test-container">
+            <h1 className="test-container-header">Army Research Institute Testing System</h1>
+            <div className="test-completion-amount-container">
+              <p className="test-completion-amount-container-title">Current Completion:</p>
+            </div>
+            <button className="take-test-button" onClick={handleTakeTestButton}>Take the test</button>
+          </div>
+        )}
+        {showTakeTest && isAdmin && (
+          <div className="take-test-container">
+            <h1 className="test-container-header">Army Research Institute Testing System</h1>
+            <div className="test-order-container">
+              <p className="test-order-container-title">Current Test Order: </p>
+              <ul className="test-order-list">
+              {sortedTestOrders.map((testOrder) => (
+                <li key={testOrder.id} className="test-order-item">
+                  &bull; {testOrder.text_file_name}
+                </li>
+              ))}
+            </ul>
+            </div>
+            <button className="take-test-button" onClick={handleTakeTestButton}>Take the test</button>
+          </div>
         )}
         {showAccountScreen && (
           <div className="account-container">
@@ -515,8 +575,14 @@ function App() {
             {submitted ? renderHubArea() : null && showWelcomeMessage}
             {showAdminLogin && renderAdminLogin()}
           </Route>
-          <Route path="/tests">
-            <TestWebpage />
+          <Route path="/test">
+          {isLoading ? (
+              <div>Loading...</div>
+            ) : (
+                <TestWebpage
+                  
+                />
+              )}
           </Route>
           <Route path="/admin">
           {isLoading ? (

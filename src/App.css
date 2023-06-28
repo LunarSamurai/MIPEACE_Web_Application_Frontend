@@ -421,6 +421,47 @@
   cursor: pointer;
 }
 
+.take-test-container{
+
+}
+
+.test-container-header{
+
+}
+
+.test-order-container{
+  display: center;
+  align-items: center;
+  width: 100%;
+  border-bottom: 2px solid #007bff;
+  margin-bottom: 20px;
+}
+
+.test-order-container-title{
+  font-size: 20px;
+}
+
+.test-completion-amount-container{
+  display: center;
+  align-items: center;
+  width: 100%;
+  border-bottom: 2px solid #007bff;
+  margin-bottom: 20px;
+}
+
+.test-completion-amount-container-title{
+  font-size: 20px;
+}
+
+.take-test-button{
+  font-size: 20px;
+  border-radius: 5px;
+}
+
+.take-test-button:hover{
+  background-color:#6ef5ff27;
+}
+
 .logout{
   margin-left: 10px;
 }

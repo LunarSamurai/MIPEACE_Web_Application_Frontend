@@ -2,26 +2,18 @@
 <html>
 <head>
     <title>Test Page</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
 </head>
 <body>
-    <h1>Tests</h1>
-    <ul id="test-list"></ul>
+    <div id="root"></div>
+    <script type="text/babel">
+        // Import the TestPage component from TestWebpage.js
+        import TestPage from './TestWebpage.js';
 
-    <script>
-        // Fetch the test questions from the server
-        fetch('http://localhost:8080/test/questions')
-            .then(response => response.json())
-            .then(data => {
-                const testList = document.getElementById('test-list');
-                data.forEach(test => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = test.question;
-                    testList.appendChild(listItem);
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+        // Render the TestPage component inside the 'root' element
+        ReactDOM.render(<TestPage />, document.getElementById('root'));
     </script>
 </body>
 </html>
