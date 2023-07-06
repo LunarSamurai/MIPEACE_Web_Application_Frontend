@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Test.css'; // Import the CSS file
+import { useHistory } from 'react-router-dom';
 
 function TestPage() {
   const [sortedTestOrders, setSortedTestOrders] = useState([]);
@@ -7,7 +8,11 @@ function TestPage() {
   const [currentTestLines, setCurrentTestLines] = useState([]);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [lastLinesList, setLastLinesList] = useState([]);
-
+  const [questionRecords, setQuestionRecords] = useState([]);
+  const [buttonsDisabled, setButtonsDisabled] = useState(false);
+  const [showContinueMessage, setShowContinueMessage] = useState(false);
+  const [assessmentComplete, setAssessmentComplete] = useState(false); // New state variable
+  const history = useHistory();
 
   useEffect(() => {
     // Fetch the test orders
@@ -19,7 +24,7 @@ function TestPage() {
 
         // Sort the entries by test_order_number
         const sortedOrders = testOrdersArray.sort((a, b) => a.testOrderNumber - b.testOrderNumber);
-        console.log(sortedOrders);
+
         // Set the sorted test orders
         setSortedTestOrders(sortedOrders);
 
@@ -33,7 +38,28 @@ function TestPage() {
         // Handle any errors that occurred during the request
         // Display an error message or perform appropriate error handling
       });
+
+    // Add event listener to clear questionRecords on page refresh or close
+    window.addEventListener('beforeunload', clearQuestionRecords);
+    return () => {
+      window.removeEventListener('beforeunload', clearQuestionRecords);
+    };
   }, []);
+
+  const clearQuestionRecords = () => {
+    // Check if sessionStorage has the 'questionRecords' key
+    if (sessionStorage.getItem('questionRecords')) {
+      // Do not remove the sessionStorage on refresh
+      sessionStorage.removeItem('questionRecords');
+    }
+  };
+
+  useEffect(() => {
+    // Fetch and display the first test file initially
+    if (sortedTestOrders.length > 0) {
+      fetchTestFile(sortedTestOrders[currentTestIndex].textFileName);
+    }
+  }, [sortedTestOrders, currentTestIndex]);
 
   const fetchTestFile = (textFileName) => {
     fetch(`http://localhost:8080/api/get-test-file?fileName=${textFileName}`)
@@ -43,77 +69,198 @@ function TestPage() {
         const lastLine = lines.pop();
         setCurrentTestLines(lines);
         setCurrentLineIndex(0);
-        if (lastLine) {
-          setLastLinesList((prevList) => [...prevList, { fileName: textFileName, lastLine }]);
-          console.log(lastLinesList);
-        }
+
+        // Store the question record for the first line
+        const firstLine = lines[0];
+        const [questionContent, positiveOrNegative] = firstLine.split('/').map((item) => item.trim());
+        const record = {
+          cacID: sessionStorage.getItem('cacid'),
+          textFileName: sortedTestOrders[currentTestIndex].textFileName,
+          questionContent,
+          positiveOrNegative,
+        };
+        setQuestionRecords((prevRecords) => [...prevRecords, record]);
+        console.log(record);
+        console.log(sessionStorage.getItem('questionRecords'));
+      })
+      .catch((error) => {
+        console.error(error);
+        // Handle any errors that occurred during the request
+        //Display an error message or perform appropriate error handling
+      });
+  };
+
+  const handleAnswerButtonClick = (answer) => {
+    if (buttonsDisabled) {
+      setShowContinueMessage(true);
+    } else {
+      const line = currentTestLines[currentLineIndex];
+      const [questionContent, positiveOrNegative] = line.split('/').map((item) => item.trim());
+      const record = {
+        cacID: sessionStorage.getItem('cacid'),
+        textFileName: sortedTestOrders[currentTestIndex].textFileName,
+        questionContent,
+        positiveOrNegative,
+        answer,
+      };
+      setQuestionRecords((prevRecords) => [...prevRecords, record]);
+      console.log(record);
+      console.log(sessionStorage.getItem('questionRecords'));
+      const storedRecords = JSON.parse(sessionStorage.getItem('questionRecords') || '[]');
+      const updatedRecords = [...storedRecords, record];
+      sessionStorage.setItem('questionRecords', JSON.stringify(updatedRecords));
+      setButtonsDisabled(true);
+    }
+  };
+
+  const handleNextButtonClick = () => {
+    if (currentLineIndex < currentTestLines.length - 1) {
+      const nextLineIndex = currentLineIndex + 1;
+      setCurrentLineIndex(nextLineIndex);
+      setButtonsDisabled(false);
+    } else {
+      if (currentTestIndex < sortedTestOrders.length - 1) {
+        const nextIndex = currentTestIndex + 1;
+        setCurrentTestIndex(nextIndex);
+
+        const nextTestOrder = sortedTestOrders[nextIndex];
+        fetchTestFile(nextTestOrder.textFileName);
+        setButtonsDisabled(false);
+      } else {
+        setAssessmentComplete(true);
+      }
+    }
+  };
+  const handleSkipButtonClick = () => {
+    if (currentLineIndex < currentTestLines.length - 1) {
+      const nextLineIndex = currentLineIndex + 1;
+      setCurrentLineIndex(nextLineIndex);
+      setButtonsDisabled(false);
+    } else {
+      if (currentTestIndex < sortedTestOrders.length - 1) {
+        const nextIndex = currentTestIndex + 1;
+        setCurrentTestIndex(nextIndex);
+
+        const nextTestOrder = sortedTestOrders[nextIndex];
+        fetchTestFile(nextTestOrder.textFileName);
+        setButtonsDisabled(false);
+      } else {
+        setAssessmentComplete(true);
+      }
+    }
+  };
+
+  const handleReturnToHome = () => {
+    // Get the user responses from sessionStorage
+    const questionRecords = JSON.parse(sessionStorage.getItem('questionRecords') || '[]');
+  
+    // Create an array of user response objects
+    const userResponses = questionRecords.map((record) => {
+      return {
+        cacID: record.cacID,
+        textFileName: record.textFileName,
+        questionContent: record.questionContent,
+        positiveOrNegative: record.positiveOrNegative,
+        answer: record.answer,
+      };
+    });
+  
+    // Send the user responses to the backend
+    fetch('http://localhost:8080/api/save-user-responses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userResponses),
+    })
+      .then((response) => response.text())
+      .then((data) => {
+        console.log(data); // Log the response from the backend
+        // Perform any further actions or display a success message
       })
       .catch((error) => {
         console.error(error);
         // Handle any errors that occurred during the request
         // Display an error message or perform appropriate error handling
       });
+  
+    // Perform the necessary actions to redirect to App.js or the home page
+    // You can use the appropriate routing mechanism or any navigation method
+    console.log('Return to Home');
+    history.push('/');
+    window.location.reload();
   };
+  
 
-  //Buttons For Each Question
-  const handleStronglyAgreeClick = () => {
-
+  const renderAssessmentComplete = () => {
+    return (
+      <div className="assessment-complete-container">
+        <h1 className="assessment-complete-message">Assessment Complete</h1>
+        <p className="please-contact">Please contact your administrator for further assistance.</p>
+        <div className="assessment-spacer">
+          <p className='.assessment-spacer-message'>
+            We at the US Army Research Institute would like to thank you for coming out to our examination and Psychological assessment today. It was quiet the pleasure to have you
+            here with us today. You have tremendously helped in our efforts in creating better leaders and better soldiers. We hope to see you again and we hope to hear your feedback!
+            Please press "Return to Home" button on the bottom of the screen and logout once you get to the next screen. Many Thanks, US Army Research Institute.
+          </p>
+        </div>
+        <button className="button-return-home" onClick={handleReturnToHome}>Return to Home</button>
+      </div>
+    );
   }
-  const handleAgreeClick = () => {
-    
-  }
-  const handleNeitherClick = () => {
-    
-  }
-  const handleDisagreeClick = () => {
-    
-  }
-  const handleStronglyDisagreeClick = () => {
-    
-  }
-  const handleNextButtonClick = () => {
-    // Check if there are more lines in the current file
-    if (currentLineIndex < currentTestLines.length - 1) {
-      // Increment the current line index
-      const nextLineIndex = currentLineIndex + 1;
-      setCurrentLineIndex(nextLineIndex);
-    } else {
-      // Check if there are more test files to display
-      if (currentTestIndex < sortedTestOrders.length - 1) {
-        // Increment the current test index
-        const nextIndex = currentTestIndex + 1;
-        setCurrentTestIndex(nextIndex);
-
-        // Fetch and display the next test file
-        const nextTestOrder = sortedTestOrders[nextIndex];
-        fetchTestFile(nextTestOrder.textFileName);
-      } else {
-        // Handle case when all test files have been displayed
-        console.log('All test files have been displayed.');
-      }
-    }
-  };
 
   return (
     <div>
-      {currentTestLines.length > 0 && (
+      {!assessmentComplete && currentTestLines.length > 0 && (
         <div className="TestQuestionContainer">
           <p className="DisplayText">{currentTestLines[currentLineIndex].split(/[|]/)[0]}</p>
-          <div className="spacer">
-          </div>
+          <div className="spacer"></div>
           <div className="choice-container">
-            <button className="button-strongly-agree" onClick={handleStronglyAgreeClick}>Strongly Agree</button>
-            <button className="button-agree" onClick={handleAgreeClick}>Agree</button>
-            <button className="button-neither" onClick={handleNeitherClick}>Neither</button>
-            <button className="button-disagree" onClick={handleDisagreeClick}>Disagree</button>
-            <button className="button-strongly-disagree" onClick={handleStronglyDisagreeClick}>Strongly Disagree</button>
+            <ul>
+              {showContinueMessage && (
+                <p className="continue-message">You've already selected, please press the "Next" button.</p>
+              )}
+              <li>
+                <button className="button-strongly-agree" onClick={() => handleAnswerButtonClick('Strongly Agree')} disabled={buttonsDisabled}>
+                  <span className="button-strongly-agree-icon"></span>
+                  <span className="button-strongly-agree-text">Strongly Agree</span>
+                </button>
+              </li>
+              <li>
+                <button className="button-agree" onClick={() => handleAnswerButtonClick('Agree')} disabled={buttonsDisabled}>
+                  <span className="button-agree-icon"></span>
+                  <span className="button-agree-text">Agree</span>
+                </button>
+              </li>
+              <li>
+                <button className="button-neither" onClick={() => handleAnswerButtonClick('Neither')} disabled={buttonsDisabled}>
+                  <span className="button-neither-icon"></span>
+                  <span className="button-neither-text">Neither</span>
+                </button>
+              </li>
+              <li>
+                <button className="button-disagree" onClick={() => handleAnswerButtonClick('Disagree')} disabled={buttonsDisabled}>
+                  <span className="button-disagree-icon"></span>
+                  <span className="button-disagree-text">Disagree</span>
+                </button>
+              </li>
+              <li>
+                <button className="button-strongly-disagree" onClick={() => handleAnswerButtonClick('Strongly Disagree')} disabled={buttonsDisabled}>
+                  <span className="button-strongly-disagree-icon"></span>
+                  <span className="button-strongly-disagree-text">Strongly Disagree</span>
+                </button>
+              </li>
+            </ul>
           </div>
-          <button className="button-next" onClick={handleNextButtonClick}>Next</button>
+          <div className="auxilllary-button-container">
+            <button className="button-next" onClick={handleNextButtonClick}>Next</button>
+            <button className="button-skip" onClick={handleSkipButtonClick}>Skip</button>
+          </div>
         </div>
       )}
+      {assessmentComplete && renderAssessmentComplete()}
     </div>
   );
-  
 }
 
 export default TestPage;
