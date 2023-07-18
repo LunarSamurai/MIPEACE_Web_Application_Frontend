@@ -57,6 +57,7 @@ function App() {
   const [showTakeTest, setShowTakeTest] = useState(false);
   const [testOrders, setTestOrders] = useState([]);
   const [redirectToTest, setRedirectToTest] = useState(false); // State variable for redirection
+  const [completionStatus, setCompletionStatus] = useState('');
 
 
   useEffect(() => {
@@ -64,6 +65,17 @@ function App() {
     console.log("isAdmin from localStorage: ", isAdmin); // log to the console
     setIsAdmin(isAdmin);
     setIsLoading(false);
+    const currentCompletionStatus = sessionStorage.getItem('assessmentComplete');
+    if(currentCompletionStatus == 'Completed'){
+      setCompletionStatus('Completed');
+    }
+    else if(currentCompletionStatus == 'In Progress'){
+      setCompletionStatus('In Progress');
+    }
+    else{
+      setCompletionStatus('Not Started Yet');
+      
+    }
     if(sessionStorage.length > 0){
       setShowSignup(false);
       setShowLogo(false);
@@ -185,7 +197,16 @@ function App() {
   };
   
   const handleTakeTestButton = () => {
+    const testIsCompleted =  sessionStorage.getItem('assessmentComplete');
+    if(testIsCompleted == 'Completed'){
+      setCompletionStatus('Completed');
+      setRedirectToTest(false);
+    }else{
+      sessionStorage.setItem('assessmentComplete', 'In Progress');
+      console.log(sessionStorage.getItem('assessmentComplete'));
+      setCompletionStatus('In Progress');
       setRedirectToTest(true);
+    }
   }
 
   const handleAccountClick = () => {
@@ -198,6 +219,7 @@ function App() {
   const handleLogoutClick = () => {
     sessionStorage.clear();
     window.location.reload();
+
   }
 
   const handleBannerImageChange = (e) => {
@@ -433,7 +455,7 @@ function App() {
           <div className="take-test-container">
             <h1 className="test-container-header">Army Research Institute Testing System</h1>
             <div className="test-completion-amount-container">
-              <p className="test-completion-amount-container-title">Current Completion:</p>
+              <p className="test-completion-amount-container-title">Current Completion: {completionStatus}</p>
             </div>
             <button className="take-test-button" onClick={handleTakeTestButton}>Take the test</button>
           </div>

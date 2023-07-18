@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Test.css'; // Import the CSS file
 import { useHistory } from 'react-router-dom';
+import warningSound from "./wrong-answer-126515.mp3";
 
 function TestPage() {
   const [sortedTestOrders, setSortedTestOrders] = useState([]);
@@ -13,6 +14,15 @@ function TestPage() {
   const [showContinueMessage, setShowContinueMessage] = useState(false);
   const [assessmentComplete, setAssessmentComplete] = useState(false); // New state variable
   const history = useHistory();
+
+  const responseIdMap = {
+    'Strongly Disagree': 5,
+    'Disagree': 4,
+    'Neither': 3,
+    'Agree': 2,
+    'Strongly Agree': 1,
+    'Skip': 0,
+  };
 
   useEffect(() => {
     // Fetch the test orders
@@ -86,34 +96,29 @@ function TestPage() {
       .catch((error) => {
         console.error(error);
         // Handle any errors that occurred during the request
-        //Display an error message or perform appropriate error handling
+        // Display an error message or perform appropriate error handling
       });
   };
 
   const handleAnswerButtonClick = (answer) => {
-    if (buttonsDisabled) {
-      setShowContinueMessage(true);
-    } else {
-      const line = currentTestLines[currentLineIndex];
-      const [questionContent, positiveOrNegative] = line.split('/').map((item) => item.trim());
-      const record = {
-        cacID: sessionStorage.getItem('cacid'),
-        textFileName: sortedTestOrders[currentTestIndex].textFileName,
-        questionContent,
-        positiveOrNegative,
-        answer,
-      };
-      setQuestionRecords((prevRecords) => [...prevRecords, record]);
-      console.log(record);
-      console.log(sessionStorage.getItem('questionRecords'));
-      const storedRecords = JSON.parse(sessionStorage.getItem('questionRecords') || '[]');
-      const updatedRecords = [...storedRecords, record];
-      sessionStorage.setItem('questionRecords', JSON.stringify(updatedRecords));
-      setButtonsDisabled(true);
-    }
-  };
+    const line = currentTestLines[currentLineIndex];
+    const [questionContent, positiveOrNegative, selectedChoice] = line.split('/').map((item) => item.trim());
+    const record = {
+      cacID: sessionStorage.getItem('cacid'),
+      textFileName: sortedTestOrders[currentTestIndex].textFileName,
+      questionContent,
+      positiveOrNegative,
+      answer,
+      selectedChoice, // Save the selected choice in the record
+      responseId: responseIdMap[answer], // Add the response ID based on the answer
+    };
+    setQuestionRecords((prevRecords) => [...prevRecords, record]);
+    console.log(record);
+    console.log(sessionStorage.getItem('questionRecords'));
+    const storedRecords = JSON.parse(sessionStorage.getItem('questionRecords') || '[]');
+    const updatedRecords = [...storedRecords, record];
+    sessionStorage.setItem('questionRecords', JSON.stringify(updatedRecords));
 
-  const handleNextButtonClick = () => {
     if (currentLineIndex < currentTestLines.length - 1) {
       const nextLineIndex = currentLineIndex + 1;
       setCurrentLineIndex(nextLineIndex);
@@ -128,10 +133,22 @@ function TestPage() {
         setButtonsDisabled(false);
       } else {
         setAssessmentComplete(true);
+        sessionStorage.setItem('assessmentComplete', "Completed");
       }
     }
   };
-  const handleSkipButtonClick = () => {
+
+  const handleNextButtonClick = () => {
+    // Check if any choice container button has been selected
+    const selectedChoice = currentTestLines[currentLineIndex].split('/').map((item) => item.trim())[2];
+    if (!buttonsDisabled && !selectedChoice) {
+      const audio = new Audio(warningSound);
+      audio.play();
+      // Display alert message
+      alert('Please select an option before continuing.');
+      return; // Exit the function without proceeding further
+    }
+
     if (currentLineIndex < currentTestLines.length - 1) {
       const nextLineIndex = currentLineIndex + 1;
       setCurrentLineIndex(nextLineIndex);
@@ -153,7 +170,7 @@ function TestPage() {
   const handleReturnToHome = () => {
     // Get the user responses from sessionStorage
     const questionRecords = JSON.parse(sessionStorage.getItem('questionRecords') || '[]');
-  
+
     // Create an array of user response objects
     const userResponses = questionRecords.map((record) => {
       return {
@@ -162,9 +179,10 @@ function TestPage() {
         questionContent: record.questionContent,
         positiveOrNegative: record.positiveOrNegative,
         answer: record.answer,
+        responseId: record.responseId, // Include the response ID in the object
       };
     });
-  
+
     // Send the user responses to the backend
     fetch('http://localhost:8080/api/save-user-responses', {
       method: 'POST',
@@ -183,14 +201,14 @@ function TestPage() {
         // Handle any errors that occurred during the request
         // Display an error message or perform appropriate error handling
       });
-  
+
     // Perform the necessary actions to redirect to App.js or the home page
     // You can use the appropriate routing mechanism or any navigation method
     console.log('Return to Home');
     history.push('/');
     window.location.reload();
   };
-  
+
 
   const renderAssessmentComplete = () => {
     return (
@@ -250,11 +268,13 @@ function TestPage() {
                   <span className="button-strongly-disagree-text">Strongly Disagree</span>
                 </button>
               </li>
+              <li>
+                <button className="button-skip" onClick={() => handleAnswerButtonClick('Skip')} disabled={buttonsDisabled}>
+                <span className="button-strongly-disagree-icon"></span>
+                <span className="button-strongly-disagree-text">Skip</span>
+                </button>
+              </li>
             </ul>
-          </div>
-          <div className="auxilllary-button-container">
-            <button className="button-next" onClick={handleNextButtonClick}>Next</button>
-            <button className="button-skip" onClick={handleSkipButtonClick}>Skip</button>
           </div>
         </div>
       )}

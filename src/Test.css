@@ -254,7 +254,8 @@
   .button-agree,
   .button-neither,
   .button-disagree,
-  .button-strongly-disagree {
+  .button-strongly-disagree,
+  .button-skip {
     display: flex;
     align-items: center;
     border-radius: 20px;
@@ -286,6 +287,12 @@
     color: white;
   }
 
+  .button-skip {
+    background-color: #f44336;
+    color: white;
+    
+  }
+
 .button-next {
     border-radius: 5px;
     padding:10px;
@@ -297,16 +304,6 @@
     background-color: #f1f1f1;
 }
 
-.button-skip {
-    border-radius: 5px;
-    padding:10px;
-    margin-left: 5px;
-}
-
-.button-skip:hover{
-    color: white;
-    background-color: #f1f1f1;
-}
 
 .assessment-complete-container {
     display: flex;
