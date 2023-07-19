@@ -15,7 +15,7 @@ function TestPage() {
   const [assessmentComplete, setAssessmentComplete] = useState(false); // New state variable
   const history = useHistory();
 
-  const responseIdMap = {
+  const responseIDMap = {
     'Strongly Disagree': 5,
     'Disagree': 4,
     'Neither': 3,
@@ -110,7 +110,7 @@ function TestPage() {
       positiveOrNegative,
       answer,
       selectedChoice, // Save the selected choice in the record
-      responseId: responseIdMap[answer], // Add the response ID based on the answer
+      responseID: responseIDMap[answer], // Add the response ID based on the answer
     };
     setQuestionRecords((prevRecords) => [...prevRecords, record]);
     console.log(record);
@@ -179,7 +179,7 @@ function TestPage() {
         questionContent: record.questionContent,
         positiveOrNegative: record.positiveOrNegative,
         answer: record.answer,
-        responseId: record.responseId, // Include the response ID in the object
+        responseID: record.responseID, // Include the response ID in the object
       };
     });
 

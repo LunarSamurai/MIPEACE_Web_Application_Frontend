@@ -59,6 +59,11 @@ function App() {
   const [redirectToTest, setRedirectToTest] = useState(false); // State variable for redirection
   const [completionStatus, setCompletionStatus] = useState('');
 
+  // New Button Containner
+  const [showNewContainer, setShowNewContainer] = useState(false);
+  const [fileNames, setFileNames] = useState([]);
+  const [selectedFileName, setSelectedFileName] = useState('');
+
 
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -168,7 +173,7 @@ function App() {
 
     setSubmitted(true);
   };
-
+  
   const handleTestClick = () => {
     fetch('http://localhost:8080/api/get-test-order', {
       method: 'GET'
@@ -177,11 +182,14 @@ function App() {
       .then((data) => {
         // Ensure data is an array before sorting
         const testOrdersArray = Array.isArray(data) ? data : [];
-
+  
         // Sort the entries by test_order_number
         const sortedTestOrders = testOrdersArray.sort((a, b) => a.test_order_number - b.test_order_number);
         // Print the sorted test orders to the console
         console.log(sortedTestOrders);
+  
+        // Update the testOrders state variable with the sorted test orders
+        setTestOrders(sortedTestOrders);
   
         setTestScreen(true);
         setShowTakeTest(true);
@@ -195,6 +203,7 @@ function App() {
         // Display an error message or perform appropriate error handling
       });
   };
+  
   
   const handleTakeTestButton = () => {
     const testIsCompleted =  sessionStorage.getItem('assessmentComplete');
@@ -270,6 +279,17 @@ function App() {
 
   const handleNewClick = () => {
     // Logic for handling "New" click
+    setShowNewContainer(true);
+    fetch('http://localhost:8080/api/get-file-names')
+    .then((response) => response.json())
+    .then((data) => {
+      setFileNames(data);
+      setShowNewContainer(true);
+    })
+    .catch((error) => {
+      console.error(error);
+      // Handle any errors that occurred during the request
+    });
   };
 
   const handleUpdateClick = () => {
@@ -282,6 +302,45 @@ function App() {
     // Logic for handling "View" click
   };
 
+  const handleFileInputChange = (event) => {
+    const file = event.target.files[0];
+    setSelectedFileName(file ? file.name : '');
+  }
+  
+  const handleFileUpload = () => {
+    const fileInput = document.getElementById('file-upload');
+    const file = fileInput.files[0];
+  
+    if (file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      console.log("File has been selected", file);
+      fetch('http://localhost:8080/api/upload-file', {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => {
+          if (response.ok) {
+            console.log("File Uploaded Successfully");
+            // File upload successful
+            // Perform any necessary actions, such as showing a success message or updating the file list
+          } else {
+            // File upload failed
+            // Handle the error case
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          // Handle any errors that occurred during the request
+        });
+    } else {
+      // Handle case when no file is selected
+      console.log('No file selected.');
+    }
+  };
+  
+  
+  
   const handleAdminLoginSubmit = (event) => {
     event.preventDefault();
 
@@ -398,6 +457,37 @@ function App() {
     if (redirectToTest){
       return <Redirect to="/test/" />
     }
+    const renderNewContainer = () => {
+      if (showNewContainer) {
+        return (
+          <div className="new-container">
+            <h1 className = "new-h1">Want to add new files to the test pool?</h1>
+            <div className = "Spacer_section">
+              <h3 className = "new-spacer-title">Current List</h3>
+              <ul>
+                {fileNames.map((fileName) => (
+                <li key={fileName}>{fileName}</li>
+                ))}
+              </ul>
+            </div>
+            <label htmlFor="file-upload" className="custom-file-input-button">
+              {selectedFileName || 'Choose file'}
+            </label>
+            <input
+              type="file"
+              id="file-upload"
+              className="file-input"
+              onChange={handleFileInputChange}
+              accept=".txt"
+             />
+            <button className = "upload-button" onClick={handleFileUpload}>
+              Upload
+            </button>
+          </div>
+        );
+      }
+      return null;
+    };
     const sortedTestOrders = testOrders.sort((a, b) => a.test_order_number - b.test_order_number);
     return (
       <div className={`hub-area ${isAdmin ? 'admin-mode' : ''}`}>
@@ -530,7 +620,8 @@ function App() {
               </div>
             </div>
           </div>
-        )}
+          )}
+        {renderNewContainer()} 
       </div>
     );
   };
