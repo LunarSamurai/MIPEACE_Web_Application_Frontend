@@ -196,6 +196,7 @@ function App() {
         setAccountScreen(false);
         setShowWelcomeMessage(false);
         setShowLogo(false);
+        setShowNewContainer(false);
       })
       .catch((error) => {
         console.error(error);
@@ -223,6 +224,7 @@ function App() {
     setShowWelcomeMessage(false);
     setShowTakeTest(false);
     setShowLogo(false);
+    setShowNewContainer(false);
   };
 
   const handleLogoutClick = () => {
@@ -280,6 +282,8 @@ function App() {
   const handleNewClick = () => {
     // Logic for handling "New" click
     setShowNewContainer(true);
+    setShowTakeTest(false);
+    setAccountScreen(false);
     fetch('http://localhost:8080/api/get-file-names')
     .then((response) => response.json())
     .then((data) => {
