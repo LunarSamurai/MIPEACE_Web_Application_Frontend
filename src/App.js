@@ -59,11 +59,18 @@ function App() {
   const [redirectToTest, setRedirectToTest] = useState(false); // State variable for redirection
   const [completionStatus, setCompletionStatus] = useState('');
 
-  // New Button Containner
+  // New Button Container
   const [showNewContainer, setShowNewContainer] = useState(false);
   const [fileNames, setFileNames] = useState([]);
   const [selectedFileName, setSelectedFileName] = useState('');
 
+  // Edit Button Container
+  const [showEditContainer, setShowEditContainer] = useState(false);
+  const [showEditTestPoolContainer, setShowEditTestPoolContainer] = useState(false);
+  const [numOfTests, setNumOfTests] = useState(0);
+  const [selectedTests, setSelectedTests] = useState([]);
+  const [tests, setTests] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -279,23 +286,6 @@ function App() {
     setShowLogo(false);
   };
 
-  const handleNewClick = () => {
-    // Logic for handling "New" click
-    setShowNewContainer(true);
-    setShowTakeTest(false);
-    setAccountScreen(false);
-    fetch('http://localhost:8080/api/get-file-names')
-    .then((response) => response.json())
-    .then((data) => {
-      setFileNames(data);
-      setShowNewContainer(true);
-    })
-    .catch((error) => {
-      console.error(error);
-      // Handle any errors that occurred during the request
-    });
-  };
-
   const handleUpdateClick = () => {
     console.log("Value of isAdmin:", isAdmin); // This line logs the value of isAdmin to the browser console
     setRedirectToAdmin(true);
@@ -304,6 +294,94 @@ function App() {
 
   const handleViewClick = () => {
     // Logic for handling "View" click
+  };
+
+  const handleEditClick = () => {
+    // Logic for handling "Edit" click
+    setShowEditContainer(true);
+    setAccountScreen(false);
+    setShowTakeTest(false);
+    setShowNewContainer(false);
+    fetchFileList();
+  }
+
+  const handleEditButtonClick = () => {
+    setShowEditTestPoolContainer(true);
+  }
+
+  const handleUpdateTests = () => {
+    if (isNaN(numOfTests) || numOfTests === '') {
+      setErrorMessage('Invalid Value Entered, please enter only numeric values');
+      return;
+    }
+
+    const updatedSelectedTests = Array(numOfTests).fill('');
+    setSelectedTests(updatedSelectedTests);
+    setErrorMessage('');
+  };
+
+  const handleTestSelection = (event, index) => {
+    const updatedSelectedTests = [...selectedTests];
+    updatedSelectedTests[index] = event.target.value;
+    setSelectedTests(updatedSelectedTests);
+  };
+  
+  const handleUpdateNumOfTests = (event) => {
+    const value = parseInt(event.target.value);
+    setNumOfTests(value);
+  };
+
+  const handleRemoveButtonClick = () => {
+    const filesToRemove = Object.values(selectedTests).filter((fileName) => !!fileName);
+    // Perform logic to remove the selected files
+  
+    // Example implementation:
+    fetch('http://localhost:8080/api/remove-files', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ files: filesToRemove }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Files removed successfully');
+        // Perform any necessary actions, such as updating the file list or displaying a success message
+        fetchFileList(); // Fetch the updated file list from the server
+        setShowEditTestPoolContainer(false); // Hide the edit container
+      })
+      .catch((error) => {
+        console.error(error);
+        // Handle any errors that occurred during the request
+        // Display an error message or perform appropriate error handling
+      });
+  };
+
+  useEffect(() => {
+    if (showNewContainer) {
+      fetchFileList();
+    }
+  }, [showNewContainer]);
+
+  useEffect(() => {
+    if (showEditContainer) {
+      fetchFileList();
+    }
+  }, [showEditContainer]);
+
+  const fetchFileList = () => {
+    fetch('http://localhost:8080/api/get-file-names')
+      .then((response) => response.json())
+      .then((data) => {
+        setTests(data);
+        console.log(tests);
+        setFileNames(data);
+        console.log(fileNames);
+      })
+      .catch((error) => {
+        console.error(error);
+        // Handle any errors that occurred during the request
+      });
   };
 
   const handleFileInputChange = (event) => {
@@ -318,7 +396,7 @@ function App() {
     if (file) {
       const formData = new FormData();
       formData.append('file', file);
-      console.log("File has been selected", file);
+  
       fetch('http://localhost:8080/api/upload-file', {
         method: 'POST',
         body: formData,
@@ -327,7 +405,11 @@ function App() {
           if (response.ok) {
             console.log("File Uploaded Successfully");
             // File upload successful
-            // Perform any necessary actions, such as showing a success message or updating the file list
+            // Fetch the updated file list from the server
+            fetchFileList();
+            setShowNewContainer(false); // Hide the new container temporarily
+            setSelectedFileName(''); // Reset the selected file name
+            setShowNewContainer(true); // Show the new container again to trigger the useEffect
           } else {
             // File upload failed
             // Handle the error case
@@ -342,8 +424,27 @@ function App() {
       console.log('No file selected.');
     }
   };
-  
-  
+
+  const handleNewClick = () => {
+    // Logic for handling "New" click
+    setShowNewContainer(true);
+    setShowTakeTest(false);
+    setAccountScreen(false);
+    setShowEditContainer(false);
+    fetch('http://localhost:8080/api/get-file-names')
+    .then((response) => response.json())
+    .then((data) => {
+      setTests(data);
+      console.log(tests);
+      setFileNames(data);
+      console.log(fileNames);
+      setShowNewContainer(true);
+    })
+    .catch((error) => {
+      console.error(error);
+      // Handle any errors that occurred during the request
+    });
+  };
   
   const handleAdminLoginSubmit = (event) => {
     event.preventDefault();
@@ -453,7 +554,7 @@ function App() {
       </div>
     </div>
   );
-
+  
   const renderHubArea = () => {
     if (redirectToAdmin) {
       return <Redirect to="/admin" />;
@@ -474,6 +575,7 @@ function App() {
                 ))}
               </ul>
             </div>
+            <p className = "directory-message">Please press "upload" twice for updated list.</p>
             <label htmlFor="file-upload" className="custom-file-input-button">
               {selectedFileName || 'Choose file'}
             </label>
@@ -492,6 +594,86 @@ function App() {
       }
       return null;
     };
+
+    const renderEditContainer = () => {
+      if (showEditContainer) {
+        return (
+          <div className="edit-current-test-pool-container">
+            <h1 className="edit-current-test-pool-header">Edit Current Test Pool</h1>
+            <div className="current-list-container">
+              <h3 className="current-list-title">Current List</h3>
+              <ul>
+                {fileNames.map((fileName) => (
+                  <li key={fileName}>{fileName}</li>
+                ))}
+              </ul>
+            </div>
+            <button className="edit-button" onClick={handleEditButtonClick}>
+              Edit
+            </button>
+          </div>
+        );
+      }
+      return null;
+    };
+  
+    const renderEditTestPoolContainer = () => {
+      if (showEditTestPoolContainer) {
+      return (
+        <div className="edit-test-pool-container">
+          <div className="edit-test-pool-content">
+            <div className="edit-test-pool-form">
+              <form onSubmit={handleRemoveButtonClick}>
+                <h1 className="edit-test-pool-header">Edit the Test Pool</h1>
+                <div className="amount-input-container">
+                  <label htmlFor="test-dropdown" className="amount-input">
+                    Items to remove:
+                  </label>
+                  {selectedTests.map((selectedTest, index) => (
+                    <select
+                      key={index}
+                      className="form-select"
+                      onChange={(event) => handleTestSelection(event, index)}
+                      value={selectedTest} // Update this line
+                    >
+                      <option value="">-- Select a test --</option>
+                      {tests.length > 0 &&
+                        tests.map((test) => (
+                          <option key={test.id} value={test.id}>
+                            {test.name}
+                          </option>
+                        ))}
+                    </select>
+                  ))}
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="num-of-tests" className="form-label">
+                    Number of Tests in Sequence:
+                  </label>
+                  <input
+                    type="number"
+                    id="num-of-tests"
+                    name="num-of-tests"
+                    className="form-control"
+                    value={numOfTests}
+                    onChange={handleUpdateNumOfTests}
+                  />
+                  <button type="button" className="btn btn-primary" onClick={handleUpdateTests}>
+                    Update
+                  </button>
+                </div>
+                <button className="remove-button" onClick={handleRemoveButtonClick}>
+                  Remove
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+    
     const sortedTestOrders = testOrders.sort((a, b) => a.test_order_number - b.test_order_number);
     return (
       <div className={`hub-area ${isAdmin ? 'admin-mode' : ''}`}>
@@ -518,6 +700,9 @@ function App() {
               <div className="admin-buttons">
                 <div className="clickable-section" onClick={handleNewClick}>
                   New
+                </div>
+                <div className="clickable-section" onClick={handleEditClick}>
+                  Edit
                 </div>
                 <div className="clickable-section" onClick={handleUpdateClick}>
                   Update
@@ -626,6 +811,8 @@ function App() {
           </div>
           )}
         {renderNewContainer()} 
+        {renderEditContainer()}
+        {renderEditTestPoolContainer()}
       </div>
     );
   };
