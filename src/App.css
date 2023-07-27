@@ -421,13 +421,6 @@
   cursor: pointer;
 }
 
-.take-test-container{
-
-}
-
-.test-container-header{
-
-}
 
 .test-order-container{
   display: center;
@@ -648,7 +641,7 @@
   background-color: aqua;
 }
 
-/* Below is the edit test pool related containers: Edit Container */
+/* Below is the edit test pool related containers: Edit Container 
 .edit-current-test-pool-container{
 
 }
@@ -668,6 +661,7 @@
 .edit-button{
 
 }
+*/
 
 /* Below is the edit test pool related containers: Edit Test Pool Container */
 .edit-test-pool-container{
@@ -708,9 +702,6 @@
     color:black;
 }
 
-.amount-input{
-
-}
 
 .current-list-container{
   color:black;
@@ -732,9 +723,6 @@
   color: black;
 }
 
-.dropdown-item{
-  
-}
 
 .remove-button{
   padding: 20px 10px;
