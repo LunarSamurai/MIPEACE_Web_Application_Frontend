@@ -3,7 +3,7 @@ import './Test.css'; // Import the CSS file
 import { useHistory } from 'react-router-dom';
 import warningSound from "./wrong-answer-126515.mp3";
 
-function TestPage() {
+function TestPage(isRandomizeEnabled, setIsRandomizeEnabled) {
   const [sortedTestOrders, setSortedTestOrders] = useState([]);
   const [currentTestIndex, setCurrentTestIndex] = useState(0);
   const [currentTestLines, setCurrentTestLines] = useState([]);

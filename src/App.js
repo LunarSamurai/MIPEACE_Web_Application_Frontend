@@ -10,7 +10,6 @@ import defaultBannerImage from './defaultBannerImage.jpg';
 import { redirect } from 'react-router';
 
 function App() {
-
   //Sign up container
   const [showSignup, setShowSignup] = useState(false);
   const [cacid, setCacID] = useState('');
@@ -71,6 +70,7 @@ function App() {
   const [selectedTests, setSelectedTests] = useState([]);
   const [tests, setTests] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isRandomizeEnabled, setIsRandomizeEnabled] = useState(false);
 
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -182,34 +182,14 @@ function App() {
   };
   
   const handleTestClick = () => {
-    fetch('http://localhost:8080/api/get-test-order', {
-      method: 'GET'
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // Ensure data is an array before sorting
-        const testOrdersArray = Array.isArray(data) ? data : [];
-  
-        // Sort the entries by test_order_number
-        const sortedTestOrders = testOrdersArray.sort((a, b) => a.test_order_number - b.test_order_number);
-        // Print the sorted test orders to the console
-        console.log(sortedTestOrders);
-  
-        // Update the testOrders state variable with the sorted test orders
-        setTestOrders(sortedTestOrders);
-  
-        setTestScreen(true);
-        setShowTakeTest(true);
-        setAccountScreen(false);
-        setShowWelcomeMessage(false);
-        setShowLogo(false);
-        setShowNewContainer(false);
-      })
-      .catch((error) => {
-        console.error(error);
-        // Handle any errors that occurred during the request
-        // Display an error message or perform appropriate error handling
-      });
+    setTestScreen(true);
+    setShowTakeTest(true);
+    setAccountScreen(false);
+    setShowWelcomeMessage(false);
+    setShowLogo(false);
+    setShowNewContainer(false);
+    setShowEditContainer(false);
+    fetchFileList();
   };
   
   
@@ -232,6 +212,8 @@ function App() {
     setShowTakeTest(false);
     setShowLogo(false);
     setShowNewContainer(false);
+    setShowEditContainer(false);
+    
   };
 
   const handleLogoutClick = () => {
@@ -303,10 +285,28 @@ function App() {
     setShowTakeTest(false);
     setShowNewContainer(false);
     fetchFileList();
+    
   }
 
   const handleEditButtonClick = () => {
     setShowEditTestPoolContainer(true);
+    fetch('http://localhost:8080/test/questions')
+    .then((response) => response.json())
+    .then((data) => {
+      const testsFromServer = data.map((test) => ({
+        id: test,
+        name: test,
+      }));
+      setTests(testsFromServer);
+    })
+    .catch((error) => console.error('Error:', error));
+  }
+
+  const handleRandomizeClick = () => {
+    setIsRandomizeEnabled(true);
+      if(isRandomizeEnabled){
+        sessionStorage.setItem("isRandomizedEnabled", "true");
+      }
   }
 
   const handleUpdateTests = () => {
@@ -331,30 +331,45 @@ function App() {
     setNumOfTests(value);
   };
 
-  const handleRemoveButtonClick = () => {
-    const filesToRemove = Object.values(selectedTests).filter((fileName) => !!fileName);
-    // Perform logic to remove the selected files
+  const handleRemoveButtonClick = (event) => {
+    event.preventDefault();
   
-    // Example implementation:
-    fetch('http://localhost:8080/api/remove-files', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ files: filesToRemove }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Files removed successfully');
-        // Perform any necessary actions, such as updating the file list or displaying a success message
+    const filesToRemove = selectedTests.filter((fileName) => !!fileName);
+    console.log(filesToRemove);
+    // Create an array of promises for each file removal request
+    const removePromises = filesToRemove.map((fileName) => {
+      return fetch('http://localhost:8080/api/remove-files', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([fileName]), // Pass an array of the file name
+      })
+        .catch((error) => {
+          console.error(error);
+          console.log(`Failed to remove file "${fileName}"`);
+          throw error; // Propagate the error to the promise chain
+        });
+    });
+  
+    // Execute all promises and handle the results
+    Promise.all(removePromises)
+      .then(() => {
+        console.log('All files removed successfully');
         fetchFileList(); // Fetch the updated file list from the server
         setShowEditTestPoolContainer(false); // Hide the edit container
+        setShowEditContainer(false);
+        setTimeout(() => {
+          setShowEditContainer(true);
+        }, 2);
+        
       })
       .catch((error) => {
-        console.error(error);
-        // Handle any errors that occurred during the request
+        console.error('Error while removing files:', error);
+        // Handle any errors that occurred during the requests
         // Display an error message or perform appropriate error handling
       });
+      
   };
 
   useEffect(() => {
@@ -602,15 +617,23 @@ function App() {
             <h1 className="edit-current-test-pool-header">Edit Current Test Pool</h1>
             <div className="current-list-container">
               <h3 className="current-list-title">Current List</h3>
-              <ul>
-                {fileNames.map((fileName) => (
-                  <li key={fileName}>{fileName}</li>
+              <ul className = "editTestPoolList">
+                {fileNames.map((fileName, index) => (
+                  <li key={index}>{fileName}</li>
                 ))}
               </ul>
             </div>
+            <div className = "bottom-buttons">
             <button className="edit-button" onClick={handleEditButtonClick}>
               Edit
             </button>
+            <button className="reload-button" onClick={handleEditClick}>
+              Reload
+            </button>
+            <button className = "randomize-button" onClick={handleRandomizeClick}>
+              Randomize
+            </button>
+            </div>
           </div>
         );
       }
@@ -618,62 +641,74 @@ function App() {
     };
   
     const renderEditTestPoolContainer = () => {
+
       if (showEditTestPoolContainer) {
-      return (
-        <div className="edit-test-pool-container">
-          <div className="edit-test-pool-content">
-            <div className="edit-test-pool-form">
-              <form onSubmit={handleRemoveButtonClick}>
-                <h1 className="edit-test-pool-header">Edit the Test Pool</h1>
-                <div className="amount-input-container">
-                  <label htmlFor="test-dropdown" className="amount-input">
-                    Items to remove:
-                  </label>
-                  {selectedTests.map((selectedTest, index) => (
-                    <select
-                      key={index}
-                      className="form-select"
-                      onChange={(event) => handleTestSelection(event, index)}
-                      value={selectedTest} // Update this line
+        return (
+          <div className="edit-test-pool-container">
+            <div className="edit-test-pool-content">
+              <div className="edit-test-pool-form">
+                <form onSubmit={handleRemoveButtonClick}>
+                  <h1 className="edit-test-pool-header">Edit the Test Pool</h1>
+                  <div className="amount-input-container">
+                    <label htmlFor="test-dropdown" className="amount-input">
+                      Items to remove:
+                    </label>
+                    {selectedTests.map((selectedTest, index) => (
+                      <select
+                        key={`select_${index}`}
+                        className="form-select"
+                        onChange={(event) => handleTestSelection(event, index)}
+                        value={selectedTest}
+                      >
+                        <option value="">
+                          -- Select a test --
+                        </option>
+                        {tests.length > 0 &&
+                          tests.map((test) => (
+                            <option key={test.id} value={test.id}>
+                              {test.name}
+                            </option>
+                          ))}
+                      </select>
+                    ))}
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="num-of-tests" className="form-label">
+                      Number of Tests in Sequence:
+                    </label>
+                    <input
+                      type="number"
+                      id="num-of-tests"
+                      name="num-of-tests"
+                      className="form-control"
+                      value={numOfTests}
+                      onChange={handleUpdateNumOfTests}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleUpdateTests}
                     >
-                      <option value="">-- Select a test --</option>
-                      {tests.length > 0 &&
-                        tests.map((test) => (
-                          <option key={test.id} value={test.id}>
-                            {test.name}
-                          </option>
-                        ))}
-                    </select>
-                  ))}
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="num-of-tests" className="form-label">
-                    Number of Tests in Sequence:
-                  </label>
-                  <input
-                    type="number"
-                    id="num-of-tests"
-                    name="num-of-tests"
-                    className="form-control"
-                    value={numOfTests}
-                    onChange={handleUpdateNumOfTests}
-                  />
-                  <button type="button" className="btn btn-primary" onClick={handleUpdateTests}>
-                    Update
+                      Update
+                    </button>
+                  </div>
+                  <button className="remove-button" 
+                   onClick={(event) => handleRemoveButtonClick(event)} // Pass the event object here
+                   >
+                    Remove
                   </button>
-                </div>
-                <button className="remove-button" onClick={handleRemoveButtonClick}>
-                  Remove
-                </button>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      );
-    }
-    return null;
-  };
+        );
+      }
+      return null;
+    };
     
+    // Rest of your code...
+      
+    // Rest of your code...    
     const sortedTestOrders = testOrders.sort((a, b) => a.test_order_number - b.test_order_number);
     return (
       <div className={`hub-area ${isAdmin ? 'admin-mode' : ''}`}>
@@ -884,7 +919,8 @@ function App() {
               <div>Loading...</div>
             ) : (
                 <TestWebpage
-                  
+                  isRandomizeEnabled={isRandomizeEnabled}
+                  setIsRandomizeEnabled={setIsRandomizeEnabled}
                 />
               )}
           </Route>

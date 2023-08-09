@@ -664,6 +664,24 @@
 */
 
 /* Below is the edit test pool related containers: Edit Test Pool Container */
+.current-test-pool-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.current-list-container{
+  border: solid;
+  width: 600px;
+  height: 500px;
+  align-items: top;
+  justify-content: top;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+
 .edit-test-pool-container{
   position: fixed;
   top: 0;
@@ -676,6 +694,59 @@
   background-color: rgba(0, 0, 0, 0.6);
   z-index: 9999;
   color: black;
+}
+
+.bottom-buttons{
+  display: flex;
+  justify-content: center;
+  
+}
+
+.edit-button{
+  font-size: 15px;
+  background-color: #e91e63;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border-color: #e91e6200;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.edit-button:hover{
+  background-color: aqua;
+}
+
+.reload-button{
+  font-size: 15px;
+  margin-left: 5px;
+  background-color: #e91e63;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border-color: #e91e6200;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.reload-button:hover{
+  background-color: aqua;
+}
+
+.randomize-button{
+  font-size: 15px;
+  margin-left: 5px;
+  background-color: #e91e63;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border-color: #e91e6200;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.randomize-button:hover{
+  background-color: aqua;
 }
 
 .edit-test-pool-content{
@@ -703,10 +774,6 @@
 }
 
 
-.current-list-container{
-  color:black;
-}
-
 .current-list-title{
   color: #000;
 }
@@ -733,4 +800,8 @@
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
+}
+
+.editTestPoolList{
+  color: #000;
 }
