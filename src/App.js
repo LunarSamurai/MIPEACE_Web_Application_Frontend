@@ -72,6 +72,29 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isRandomizeEnabled, setIsRandomizeEnabled] = useState(false);
 
+  // Demographics
+  const [showDemographicsDetails, setShowDemographicsDetails] = useState(false);
+  const [showEditOptions, setShowEditOptions] = useState(false);
+
+  // Edit Demographics Modal
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedDetail, setSelectedDetail] = useState(null);  // to keep track of selected detail from dropdown
+  const [newValue, setNewValue] = useState("");
+  const [dutyStatus, setDutyStatus] = useState("");
+  const [age, setAge] = useState("");
+  const [maritalStatus, setMaritalStatus] = useState("");
+  const [grade, setGrade] = useState("");
+  const [sex, setSex] = useState("");
+  const [handedness, setHandedness] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [militaryOccupationalSpeciality, setMilitaryOccupationalSpeciality] = useState("");
+  const [siblingsCount, setSiblingsCount] = useState("");
+  
+  // New Demographics Modal
+  const [showNewDemographicModal, setShowNewDemographicModal] = useState(false);
+
+
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
     console.log("isAdmin from localStorage: ", isAdmin); // log to the console
@@ -132,6 +155,17 @@ function App() {
     setMiddleName(savedMiddleName || '');
     setLastName(savedLastName || '');
   }, []);
+  const [cacIdError, setCacIdError] = useState(null);
+
+  const handleCacIdChange = (event) => {
+      const value = event.target.value;
+      if (value === "0000000001") {
+          setCacIdError("The cacId '0000000001' is restricted.");
+      } else {
+          setCacIdError(null);
+      }
+      setCacID(value);
+  };
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
@@ -157,6 +191,7 @@ function App() {
       middleName,
       lastName,
     };
+
 
     // Make an HTTP POST request to your backend API
     fetch('http://localhost:8080/api/register', {
@@ -215,6 +250,84 @@ function App() {
     setShowEditContainer(false);
     
   };
+  
+
+  const handleSaveDetailsButton = () => {
+    if (selectedDetail) {
+        switch (selectedDetail) {
+            case "dutyStatus":
+                setDutyStatus(newValue);
+                break;
+            case "age":
+                setAge(newValue);
+                break;
+            case "maritalStatus":
+                setMaritalStatus(newValue);
+                break;
+            case "grade":
+                setGrade(newValue);
+                break;
+            case "sex":
+                setSex(newValue);
+                break;
+            case "handedness":
+                setHandedness(newValue);
+                break;
+            case "height":
+                setHeight(newValue);
+                break;
+            case "weight":
+                setWeight(newValue);
+                break;
+            case "militaryOccupationalSpeciality":
+                setMilitaryOccupationalSpeciality(newValue);
+                break;
+            case "siblingCount":
+                setSiblingsCount(newValue);
+                break;
+            default:
+                console.warn(`Unknown detail selected: ${selectedDetail}`);
+                break;
+        }
+      const dataToSend = {
+        cacID: cacid,
+        dutyStatus: dutyStatus,
+        age: age,
+        maritalStatus: maritalStatus,
+        grade: grade,
+        sex: sex,
+        handedness: handedness,
+        height: height,
+        weight: weight,
+        militaryOccupationalSpeciality: militaryOccupationalSpeciality,
+        siblingsCount: siblingsCount
+      };
+      console.log(dataToSend);
+      fetch("http://localhost:8080/api/userdetails/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(dataToSend)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          alert(data.message);
+        } else {
+          alert("User details updated successfully");
+        }
+        // Close the edit modal after saving
+        setShowEditModal(false);
+      })
+      .catch(error => {
+        console.error("There was an error updating the user details", error);
+        alert("There was an error updating the user details");
+      });
+  };
+  
+};
+
 
   const handleLogoutClick = () => {
     sessionStorage.clear();
@@ -303,11 +416,16 @@ function App() {
   }
 
   const handleRandomizeClick = () => {
-    setIsRandomizeEnabled(true);
-      if(isRandomizeEnabled){
-        sessionStorage.setItem("isRandomizedEnabled", "true");
-      }
-  }
+    const newRandomizeValue = !isRandomizeEnabled; // Toggle the value
+    setIsRandomizeEnabled(newRandomizeValue);
+    
+    // Store the new value in sessionStorage
+    sessionStorage.setItem('isRandomizedEnabled', newRandomizeValue.toString());
+    
+    // Call handleEditClick to perform additional actions
+    handleEditClick();
+  };
+  
 
   const handleUpdateTests = () => {
     if (isNaN(numOfTests) || numOfTests === '') {
@@ -536,9 +654,10 @@ function App() {
               type="text"
               placeholder="CAC ID"
               value={cacid}
-              onChange={(e) => setCacID(e.target.value)}
+              onChange={handleCacIdChange}
               required
             />
+            {cacIdError && <div className="error-message">{cacIdError}</div>}
             <input
               type="text"
               placeholder="First Name"
@@ -623,6 +742,14 @@ function App() {
                 ))}
               </ul>
             </div>
+            <h3 className="edit-bottom-title">
+              Randomized Testing: 
+            </h3>
+            {sessionStorage.getItem('isRandomizedEnabled') === 'true' ? (
+                <p className="randomize-state-true">Enabled</p>
+              ) : (
+                <p className="randomize-state-false">False</p>
+              )}
             <div className = "bottom-buttons">
             <button className="edit-button" onClick={handleEditButtonClick}>
               Edit
@@ -838,13 +965,62 @@ function App() {
                   <p>Middle Name: {middleName}</p>
                   <p>Last Name: {lastName}</p>
                 </div>
-                <div className="TestCompletion">
-                  <p>Tests that you have completed: {}</p>
+                <div className="demographics">
+                  <h3>Demographics</h3>
+                  <button onClick={() => setShowDemographicsDetails(true)}>See Details</button>
                 </div>
               </div>
             </div>
+          </div>)}
+        {showDemographicsDetails && (
+          <div className="demographics-overlay" onClick={() => setShowDemographicsDetails(false)}>
+              <div className="demographics-details" onClick={(e) => e.stopPropagation()}>
+                  <div className="demographics-title">
+                    <span>Demographics Details</span>
+                  </div>
+                  <ul>
+                      <li>Duty Status: {dutyStatus}</li>
+                      <li>Age: {age}</li>
+                      <li>Marital Status: {maritalStatus}</li>
+                      <li>Grade: {grade}</li>
+                      <li>Sex: {sex}</li>
+                      <li>Handedness: {handedness}</li>
+                      <li>Height: {height}</li>
+                      <li>Weight: {weight}</li>
+                      <li>Military Occupational Speciality: {militaryOccupationalSpeciality}</li>
+                      <li>Amount of Siblings: {siblingsCount}</li>
+                  </ul>
+                  <button onClick={() => setShowNewDemographicModal(true)}>New</button>
+                  <button onClick={() => setShowEditModal(true)}>Edit</button>
+                  <button onClick={handleSaveDetailsButton}>Save</button>
+              </div>
           </div>
           )}
+          {showEditModal && (
+              <div className="edit-overlay" onClick={() => setShowEditModal(false)}>
+                  <div className="edit-details" onClick={(e) => e.stopPropagation()}>
+                      <select value={selectedDetail} onChange={(e) => setSelectedDetail(e.target.value)}>
+                          <option value="">Choose an option to change</option>
+                          <option value="dutyStatus">Duty Status</option>
+                          <option value="age">Age</option>
+                          <option value="maritalStatus">Marital Status</option>
+                          <option value="grade">Grade</option>
+                          <option value="sex">Sex</option>
+                          <option value="handedness">Handedness</option>
+                          <option value="height">Height</option>
+                          <option value="weight">Weight</option>
+                          <option value="militaryOccupationalSpeciality">Military Occupational Speciality</option>
+                          <option value="siblingsCount">Amount of Siblings</option>
+                      </select>
+                      <input 
+                          type="text" 
+                          value={newValue} 
+                          onChange={(e) => setNewValue(e.target.value)} 
+                          placeholder="Enter new value" 
+                      />
+                      <button onClick={handleSaveDetailsButton}>Save</button>
+                  </div>
+              </div>)}
         {renderNewContainer()} 
         {renderEditContainer()}
         {renderEditTestPoolContainer()}

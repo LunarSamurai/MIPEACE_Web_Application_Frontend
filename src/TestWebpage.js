@@ -27,34 +27,77 @@ function TestPage(isRandomizeEnabled, setIsRandomizeEnabled) {
   useEffect(() => {
     // Fetch the test orders
     fetch('http://localhost:8080/api/get-test-order')
-      .then((response) => response.json())
-      .then((data) => {
-        // Ensure data is an array before sorting
-        const testOrdersArray = Array.isArray(data) ? data : [];
+        .then((response) => response.json())
+        .then(async (data) => {
+            // Ensure data is an array before sorting
+            const testOrdersArray = Array.isArray(data) ? data : [];
 
-        // Sort the entries by test_order_number
-        const sortedOrders = testOrdersArray.sort((a, b) => a.testOrderNumber - b.testOrderNumber);
+            // Sort the entries by test_order_number
+            const sortedOrders = testOrdersArray.sort((a, b) => a.testOrderNumber - b.testOrderNumber);
+            setSortedTestOrders(sortedOrders);
 
-        // Set the sorted test orders
-        setSortedTestOrders(sortedOrders);
+            // Create a master array to store all lines
+            let allLines = [];
 
-        // Fetch and display the first test file initially
-        if (sortedOrders.length > 0) {
-          fetchTestFile(sortedOrders[0].textFileName);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        // Handle any errors that occurred during the request
-        // Display an error message or perform appropriate error handling
-      });
+            // Fetch each test file and read its lines
+            for (let order of sortedOrders) {
+                const lines = await fetchTestFile(order.textFileName);
+                allLines = allLines.concat(lines);
+            }
 
-    // Add event listener to clear questionRecords on page refresh or close
-    window.addEventListener('beforeunload', clearQuestionRecords);
-    return () => {
-      window.removeEventListener('beforeunload', clearQuestionRecords);
-    };
-  }, []);
+            // Check if randomization is enabled
+            if (sessionStorage.getItem('isRandomizedEnabled') === 'true') {
+                console.log(sessionStorage.getItem('isRandomizedEnabled'));
+                allLines = shuffleArray(allLines);
+            }
+
+            // Update the state with the master array
+            setCurrentTestLines(allLines);
+            setCurrentLineIndex(0);
+
+            // Store the question record for the first line, if available
+            if (allLines.length > 0) {
+                const firstLine = allLines[0];
+                const [questionContent, positiveOrNegative] = firstLine.split('/').map((item) => item.trim());
+                const record = {
+                    cacID: sessionStorage.getItem('cacid'),
+                    textFileName: sortedOrders[currentTestIndex].textFileName,
+                    questionContent,
+                    positiveOrNegative,
+                };
+                setQuestionRecords((prevRecords) => [...prevRecords, record]);
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+            // Handle any errors that occurred during the request
+        });
+}, []);
+
+// Helper function to shuffle an array
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// Adjusted fetchTestFile function
+function fetchTestFile(textFileName) {
+    return fetch(`http://localhost:8080/api/get-test-file?fileName=${textFileName}`)
+        .then(response => response.text())
+        .then(text => {
+            const lines = text.split('\n');
+            lines.pop(); // Remove the last line, as per your original function
+            return lines;
+        })
+        .catch(error => {
+            console.error(error);
+            return [];
+        });
+}
+
 
   const clearQuestionRecords = () => {
     // Check if sessionStorage has the 'questionRecords' key
@@ -70,35 +113,6 @@ function TestPage(isRandomizeEnabled, setIsRandomizeEnabled) {
       fetchTestFile(sortedTestOrders[currentTestIndex].textFileName);
     }
   }, [sortedTestOrders, currentTestIndex]);
-
-  const fetchTestFile = (textFileName) => {
-    fetch(`http://localhost:8080/api/get-test-file?fileName=${textFileName}`)
-      .then((response) => response.text())
-      .then((text) => {
-        const lines = text.split('\n');
-        const lastLine = lines.pop();
-        setCurrentTestLines(lines);
-        setCurrentLineIndex(0);
-
-        // Store the question record for the first line
-        const firstLine = lines[0];
-        const [questionContent, positiveOrNegative] = firstLine.split('/').map((item) => item.trim());
-        const record = {
-          cacID: sessionStorage.getItem('cacid'),
-          textFileName: sortedTestOrders[currentTestIndex].textFileName,
-          questionContent,
-          positiveOrNegative,
-        };
-        setQuestionRecords((prevRecords) => [...prevRecords, record]);
-        console.log(record);
-        console.log(sessionStorage.getItem('questionRecords'));
-      })
-      .catch((error) => {
-        console.error(error);
-        // Handle any errors that occurred during the request
-        // Display an error message or perform appropriate error handling
-      });
-  };
 
   const handleAnswerButtonClick = (answer) => {
     const line = currentTestLines[currentLineIndex];
