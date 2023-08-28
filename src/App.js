@@ -10,6 +10,9 @@ import defaultBannerImage from './defaultBannerImage.jpg';
 import { redirect } from 'react-router';
 
 function App() {
+  
+  
+
   //Sign up container
   const [showSignup, setShowSignup] = useState(false);
   const [cacid, setCacID] = useState('');
@@ -93,6 +96,41 @@ function App() {
   
   // New Demographics Modal
   const [showNewDemographicModal, setShowNewDemographicModal] = useState(false);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [currentAnswer, setCurrentAnswer] = useState("");
+  const [responseMessage, setResponseMessage] = useState(null);
+  const demographicQuestions = [
+    { question: "What is your current Duty Status?", setter: setDutyStatus },
+    { question: "What is your Age?", setter: setAge },
+    { question: "What is your Marital Status?", setter: setMaritalStatus },
+    { question: "What is your Grade?", setter: setGrade },
+    { question: "What is your sex? (M|F)", setter: setSex },
+    { question: "What is your best hand?", setter: setHandedness },
+    { question: "What is your Height?", setter: setHeight },
+    { question: "What is your Weight? (lbs)", setter: setWeight },
+    { question: "What is your Military Occupational Specialty?", setter: setMilitaryOccupationalSpeciality },
+    { question: "How many siblings do you have?", setter: setSiblingsCount }
+];
+const [tempAnswer, setTempAnswer] = useState("");  // Temporary answer before pressing Next
+const [selectedDemographic, setSelectedDemographic] = useState('');
+
+const handleListClick = (value, label) => {
+    setSelectedDetail(value);
+    setSelectedDemographic(label);
+}
+
+const [demographicAnswers, setDemographicAnswers] = useState({
+  dutyStatus: "",
+  age: "",
+  maritalStatus: "",
+  grade: "",
+  sex: "",
+  handedness: "",
+  height: "",
+  weight: "",
+  militaryOccupationalSpeciality: "",
+  siblingsCount: ""
+});
 
 
   useEffect(() => {
@@ -250,7 +288,35 @@ function App() {
     setShowEditContainer(false);
     
   };
+
+  const handleNewDemographicAnswer = (value) => {
+    setTempAnswer(value);
+    const questionObj = demographicQuestions[questionIndex];
+    questionObj.setter(value);
+    if (questionIndex < demographicQuestions.length - 1) {
+        setQuestionIndex(questionIndex + 1);
+    } else {
+        setShowNewDemographicModal(false);
+        setQuestionIndex(0);
+    }
+  };
+  const handleNextButtonClick = () => {
+    const inputElement = document.querySelector('.demographics-input');
+    const inputValue = inputElement.value;
+    const setter = demographicQuestions[questionIndex].setter;
+    setter(inputValue);
+    if (questionIndex < demographicQuestions.length - 1) {
+      setQuestionIndex(questionIndex + 1);
+    } else {
+      setShowNewDemographicModal(false);
+      setQuestionIndex(0);
+    }
+    inputElement.value = '';  // Clear the input field
+  };
   
+  const handleNewDemographicButtonClick = () => {
+  setShowNewDemographicModal(true);
+  };
 
   const handleSaveDetailsButton = () => {
     if (selectedDetail) {
@@ -313,17 +379,18 @@ function App() {
       .then(response => response.json())
       .then(data => {
         if (data.message) {
-          alert(data.message);
+            setResponseMessage(data.message);
         } else {
-          alert("User details updated successfully");
+            setResponseMessage("User details updated successfully");
         }
         // Close the edit modal after saving
         setShowEditModal(false);
-      })
-      .catch(error => {
+    })
+    .catch(error => {
         console.error("There was an error updating the user details", error);
-        alert("There was an error updating the user details");
-      });
+        setResponseMessage("There was an error updating the user details");
+    });
+    
   };
   
 };
@@ -578,7 +645,17 @@ function App() {
       // Handle any errors that occurred during the request
     });
   };
-  
+
+  function MessageModal({ message, onClose }) {
+    return (
+        <div className='message-modal'>
+            <div className='message-modal-content'>
+                <p>{message}</p>
+                <button className="message-modal-close-button"onClick={onClose}>Close</button>
+            </div>
+        </div>
+    );
+  }
   const handleAdminLoginSubmit = (event) => {
     event.preventDefault();
 
@@ -832,10 +909,7 @@ function App() {
       }
       return null;
     };
-    
-    // Rest of your code...
       
-    // Rest of your code...    
     const sortedTestOrders = testOrders.sort((a, b) => a.test_order_number - b.test_order_number);
     return (
       <div className={`hub-area ${isAdmin ? 'admin-mode' : ''}`}>
@@ -972,13 +1046,13 @@ function App() {
               </div>
             </div>
           </div>)}
-        {showDemographicsDetails && (
+          {showDemographicsDetails && (
           <div className="demographics-overlay" onClick={() => setShowDemographicsDetails(false)}>
               <div className="demographics-details" onClick={(e) => e.stopPropagation()}>
                   <div className="demographics-title">
                     <span>Demographics Details</span>
                   </div>
-                  <ul>
+                  <ul className='list-of-demographics'>
                       <li>Duty Status: {dutyStatus}</li>
                       <li>Age: {age}</li>
                       <li>Marital Status: {maritalStatus}</li>
@@ -990,37 +1064,91 @@ function App() {
                       <li>Military Occupational Speciality: {militaryOccupationalSpeciality}</li>
                       <li>Amount of Siblings: {siblingsCount}</li>
                   </ul>
-                  <button onClick={() => setShowNewDemographicModal(true)}>New</button>
-                  <button onClick={() => setShowEditModal(true)}>Edit</button>
-                  <button onClick={handleSaveDetailsButton}>Save</button>
+                  <div className='demographics-details-buttons-container'>
+                    {/* Direct alert on the button to test if it's being clicked */}
+                    <button className="demographics-button-new" onClick={handleNewDemographicButtonClick}>New</button>
+                    <button className="demographics-button-edit" onClick={() => setShowEditModal(true)}>Edit</button>
+                    <button className="demographics-button-save" onClick={handleSaveDetailsButton}>Save</button>
+                  </div>
               </div>
           </div>
           )}
           {showEditModal && (
               <div className="edit-overlay" onClick={() => setShowEditModal(false)}>
                   <div className="edit-details" onClick={(e) => e.stopPropagation()}>
-                      <select value={selectedDetail} onChange={(e) => setSelectedDetail(e.target.value)}>
-                          <option value="">Choose an option to change</option>
-                          <option value="dutyStatus">Duty Status</option>
-                          <option value="age">Age</option>
-                          <option value="maritalStatus">Marital Status</option>
-                          <option value="grade">Grade</option>
-                          <option value="sex">Sex</option>
-                          <option value="handedness">Handedness</option>
-                          <option value="height">Height</option>
-                          <option value="weight">Weight</option>
-                          <option value="militaryOccupationalSpeciality">Military Occupational Speciality</option>
-                          <option value="siblingsCount">Amount of Siblings</option>
-                      </select>
-                      <input 
-                          type="text" 
-                          value={newValue} 
-                          onChange={(e) => setNewValue(e.target.value)} 
-                          placeholder="Enter new value" 
-                      />
-                      <button onClick={handleSaveDetailsButton}>Save</button>
+                      <div className='demographics-edit-modal-title'>
+                          <span>Please choose an attribute to change:</span>
+                      </div>
+                      <div className='demographics-edit-modal-editing-container center-container'>
+                          <ul className="menu clearfix">
+                              <li className="parent">
+                                  <a href="#">Demographics</a>
+                                  <ul className="children">
+                                      <li onClick={() => handleListClick('dutyStatus', 'Duty Status')} style={selectedDetail === 'dutyStatus' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Duty Status</a></li>
+                                      <li onClick={() => handleListClick('age', 'Age')} style={selectedDetail === 'age' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Age</a></li>
+                                      <li onClick={() => handleListClick('maritalStatus', 'Marital Status')} style={selectedDetail === 'maritalStatus' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Marital Status</a></li>
+                                      <li onClick={() => handleListClick('grade', 'Grade')} style={selectedDetail === 'grade' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Grade</a></li>
+                                      <li onClick={() => handleListClick('sex', 'Sex')} style={selectedDetail === 'sex' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Sex</a></li>
+                                      <li onClick={() => handleListClick('handedness', 'Handedness')} style={selectedDetail === 'handedness' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Handedness</a></li>
+                                      <li onClick={() => handleListClick('height', 'Height')} style={selectedDetail === 'height' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Height</a></li>
+                                      <li onClick={() => handleListClick('weight', 'Weight')} style={selectedDetail === 'weight' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Weight</a></li>
+                                      <li onClick={() => handleListClick('militaryOccupationalSpeciality', 'Military Occupational Speciality')} style={selectedDetail === 'militaryOccupationalSpeciality' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Military Occupational Speciality</a></li>
+                                      <li onClick={() => handleListClick('siblingsCount', 'Amount of Siblings')} style={selectedDetail === 'siblingsCount' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Amount of Siblings</a></li>
+                                  </ul>
+                              </li>
+                          </ul>
+                          <div className="input-container">
+                            <div className='current-selected-demographic'>
+                                <small>Currently Selected Demographic: <span>{selectedDemographic}</span></small>
+                            </div>
+                              <input className='demographics-edit-input'
+                                  type="text"
+                                  value={newValue}
+                                  onChange={(e) => setNewValue(e.target.value)}
+                                  placeholder="Enter new value"
+                              />
+                          </div>
+                      </div>
+                      <button className='demographics-button-save' onClick={handleSaveDetailsButton}>Save</button>
                   </div>
-              </div>)}
+              </div>
+          )}
+          {showNewDemographicModal && (
+              <div className="new-overlay">
+                  <div 
+                      className="new-demographic-modal" 
+                      onClick={() => setShowNewDemographicModal(false)}
+                  >
+                      <div 
+                          className="modal-content"
+                          onClick={(e) => e.stopPropagation()}
+                      >
+                          <p className='modal-questions'><span>{demographicQuestions[questionIndex].question}</span></p>
+                          <div className='demographics-new-input-container'>
+                              <p className='description'>Please enter your value below:</p>
+                              <input 
+                                  type="text"
+                                  className="demographics-input"
+                                  // Remove the value and onChange props
+                                  //value={tempAnswer}
+                                  // onChange={(e) => handleNewDemographicAnswer(e.target.value)}
+                              />
+                              <button 
+                                  className="close-button" 
+                                  onClick={handleNextButtonClick}>
+                                  Next
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          )}
+          {responseMessage && (
+              <MessageModal
+                  message={responseMessage}
+                  onClose={() => setResponseMessage(null)}
+              />
+          )}
         {renderNewContainer()} 
         {renderEditContainer()}
         {renderEditTestPoolContainer()}
@@ -1029,52 +1157,55 @@ function App() {
   };
 
   const renderAdminLogin = () => (
-    <div className="admin-login-container">
-      <div className="admin-login-content">
-        <form className="admin-login-form" onSubmit={handleAdminLoginSubmit}>
-          <img src={signInImage} alt="Sign In" className="admin-image" />
-          <p className="Admin-Req"> Are you an admin?</p>
-          {adminLoginError && (
-            <p className="admin-login-error-message">
-              Incorrect Admin Credentials. Please try again. Attempts left: {adminAttemptsLeft}
-            </p>
-          )}
-          <input
-            type="text"
-            placeholder="CAC ID"
-            value={adminCacid}
-            onChange={(e) => setAdminCacid(e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="First Name"
-            value={adminFirstName}
-            onChange={(e) => setAdminFirstName(e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Middle Name"
-            value={adminMiddleName}
-            onChange={(e) => setAdminMiddleName(e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={adminLastName}
-            onChange={(e) => setAdminLastName(e.target.value)}
-            required
-          />
-          <button className="admin-login-button" type="submit" disabled={adminButtonDisabled}>
-            Login
-          </button>
-        </form>
+    <div className="admin-login-overlay" onClick={() => setShowAdminLogin(false)}>
+      <div className="admin-login-container" onClick={(e) => e.stopPropagation()}>
+        <div className="admin-login-content">
+          <form className="admin-login-form" onSubmit={handleAdminLoginSubmit}>
+            <img src={signInImage} alt="Sign In" className="admin-image" />
+            <p className="Admin-Req"> Are you an admin?</p>
+            {adminLoginError && (
+              <p className="admin-login-error-message">
+                Incorrect Admin Credentials. Please try again. Attempts left: {adminAttemptsLeft}
+              </p>
+            )}
+            <input
+              type="text"
+              placeholder="CAC ID"
+              value={adminCacid}
+              onChange={(e) => setAdminCacid(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="First Name"
+              value={adminFirstName}
+              onChange={(e) => setAdminFirstName(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Middle Name"
+              value={adminMiddleName}
+              onChange={(e) => setAdminMiddleName(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={adminLastName}
+              onChange={(e) => setAdminLastName(e.target.value)}
+              required
+            />
+            <button className="admin-login-button" type="submit" disabled={adminButtonDisabled}>
+              Login
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
 
+  
   return (
     <Router>
       <div className="App">
