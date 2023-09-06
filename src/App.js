@@ -114,24 +114,24 @@ function App() {
 const [tempAnswer, setTempAnswer] = useState("");  // Temporary answer before pressing Next
 const [selectedDemographic, setSelectedDemographic] = useState('');
 
-const handleListClick = (value, label) => {
-    setSelectedDetail(value);
-    setSelectedDemographic(label);
-}
+const handleListClick = (detailKey, detailName) => {
+  setSelectedDetail(detailKey);
+  setSelectedDemographic(detailName);
+  setNewValue(userDetails[detailKey] || '');  // Set the initial value to the current value in userDetails
+};
 
-const [demographicAnswers, setDemographicAnswers] = useState({
-  dutyStatus: "",
-  age: "",
-  maritalStatus: "",
-  grade: "",
-  sex: "",
-  handedness: "",
-  height: "",
-  weight: "",
-  militaryOccupationalSpeciality: "",
-  siblingsCount: ""
+const [userDetails, setUserDetails] = useState({
+  dutyStatus: '',
+  age: '',
+  maritalStatus: '',
+  grade: '',
+  sex: '',
+  handedness: '',
+  height: '',
+  weight: '',
+  militaryOccupationalSpeciality: '',
+  siblingsCount: ''
 });
-
 
   useEffect(() => {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -319,82 +319,93 @@ const [demographicAnswers, setDemographicAnswers] = useState({
   };
 
   const handleSaveDetailsButton = () => {
+    console.log("handleSaveDetailsButton called");
     if (selectedDetail) {
+        let updatedValue;
         switch (selectedDetail) {
             case "dutyStatus":
-                setDutyStatus(newValue);
+                updatedValue = newValue;
+                setDutyStatus(updatedValue);
                 break;
             case "age":
-                setAge(newValue);
+                updatedValue = newValue;
+                setAge(updatedValue);
                 break;
             case "maritalStatus":
-                setMaritalStatus(newValue);
+                updatedValue = newValue;
+                setMaritalStatus(updatedValue);
                 break;
             case "grade":
-                setGrade(newValue);
+                updatedValue = newValue;
+                setGrade(updatedValue);
                 break;
             case "sex":
-                setSex(newValue);
+                updatedValue = newValue;
+                setSex(updatedValue);
                 break;
             case "handedness":
-                setHandedness(newValue);
+                updatedValue = newValue;
+                setHandedness(updatedValue);
                 break;
             case "height":
-                setHeight(newValue);
+                updatedValue = newValue;
+                setHeight(updatedValue);
                 break;
             case "weight":
-                setWeight(newValue);
+                updatedValue = newValue;
+                setWeight(updatedValue);
                 break;
             case "militaryOccupationalSpeciality":
-                setMilitaryOccupationalSpeciality(newValue);
+                updatedValue = newValue;
+                setMilitaryOccupationalSpeciality(updatedValue);
                 break;
             case "siblingCount":
-                setSiblingsCount(newValue);
+                updatedValue = newValue;
+                setSiblingsCount(updatedValue);
                 break;
             default:
                 console.warn(`Unknown detail selected: ${selectedDetail}`);
                 break;
         }
-      const dataToSend = {
-        cacID: cacid,
-        dutyStatus: dutyStatus,
-        age: age,
-        maritalStatus: maritalStatus,
-        grade: grade,
-        sex: sex,
-        handedness: handedness,
-        height: height,
-        weight: weight,
-        militaryOccupationalSpeciality: militaryOccupationalSpeciality,
-        siblingsCount: siblingsCount
-      };
-      console.log(dataToSend);
-      fetch("http://localhost:8080/api/userdetails/update", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(dataToSend)
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.message) {
-            setResponseMessage(data.message);
-        } else {
-            setResponseMessage("User details updated successfully");
-        }
-        // Close the edit modal after saving
-        setShowEditModal(false);
-    })
-    .catch(error => {
-        console.error("There was an error updating the user details", error);
-        setResponseMessage("There was an error updating the user details");
-    });
-    
-  };
-  
-};
 
+        const dataToSend = {
+            cacID: cacid,
+            dutyStatus: dutyStatus,
+            age: age,
+            maritalStatus: maritalStatus,
+            grade: grade,
+            sex: sex,
+            handedness: handedness,
+            height: height,
+            weight: weight,
+            militaryOccupationalSpeciality: militaryOccupationalSpeciality,
+            siblingsCount: siblingsCount
+        };
+        console.log("Sending data:", dataToSend);
+
+        fetch("http://localhost:8080/api/userdetails/update", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dataToSend)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Server response:", data);
+            if (data.message) {
+                setResponseMessage(data.message); // this will trigger the modal to open
+            } else {
+                setResponseMessage("User details updated successfully");
+            }
+        })
+        .catch(error => {
+            console.error("There was an error updating the user details", error);
+            console.log("Error encountered during fetch");
+            setResponseMessage("There was an error updating the user details");
+        });
+    }
+};
 
   const handleLogoutClick = () => {
     sessionStorage.clear();
@@ -646,12 +657,20 @@ const [demographicAnswers, setDemographicAnswers] = useState({
     });
   };
 
-  function MessageModal({ message, onClose }) {
+  function MessageModal({ message, onClose, onButtonClick }) {
     return (
         <div className='message-modal'>
             <div className='message-modal-content'>
                 <p>{message}</p>
-                <button className="message-modal-close-button"onClick={onClose}>Close</button>
+                <button 
+                  className="message-modal-close-button"
+                  onClick={() => {
+                      if (onButtonClick) onButtonClick();
+                      onClose();
+                  }}
+              >
+                  Close
+              </button>
             </div>
         </div>
     );
@@ -915,42 +934,40 @@ const [demographicAnswers, setDemographicAnswers] = useState({
       <div className={`hub-area ${isAdmin ? 'admin-mode' : ''}`}>
         <div className="top-ribbon">
           <div className="ribbon-section">
-            <h1 className="mipeace">MIPEACE</h1>
+            <div className="mipeace">MIPEACE</div>
           </div>
           {showAdminLockoutMessage && (
             <h1 className="admin-lockout-message">
               You have entered the wrong admin credentials. Please try again in 30 minutes.
             </h1>
           )}
-          <div className="ribbon-section right-section">
-            <div className='test' onClick={handleTestClick}>
-              Test
-            </div>
-            <div className='account' onClick={handleAccountClick}>
-              Account
-            </div>
-            <div className='logout' onClick={handleLogoutClick}>
-              Logout
-            </div>
-            {isAdmin && !showWelcomeMessage && !showLogo && (
-              <div className="admin-buttons">
-                <div className="clickable-section" onClick={handleNewClick}>
-                  New
-                </div>
-                <div className="clickable-section" onClick={handleEditClick}>
-                  Edit
-                </div>
-                <div className="clickable-section" onClick={handleUpdateClick}>
-                  Update
-                </div>
-                <div className="clickable-section" onClick={handleViewClick}>
-                  View
-                </div>
-              </div>
-            )}
-            <div className={`clickable-section admin-button ${adminButtonDisabled ? 'disabled' : ''}`} onClick={handleAdminClick}>
-              Admin
-            </div>
+          <div className="ribbon-section-center">
+              <nav>
+                  <ul>
+                      <li><a href="#0" onClick={handleTestClick}>Test</a></li>
+                      <li><a href="#0" onClick={handleAccountClick}>Account</a></li>
+                      <li><a href="#0" onClick={handleLogoutClick}>Logout</a></li>
+                      {isAdmin && !showWelcomeMessage && !showLogo ? (
+                          <li>
+                              <a href="#0">Admin</a>
+                              <ul className="admin-buttons">
+                                  <li><a href="#0" onClick={handleNewClick}>New</a></li>
+                                  <li><a href="#0" onClick={handleEditClick}>Edit</a></li>
+                                  <li><a href="#0" onClick={handleUpdateClick}>Update</a></li>
+                                  <li><a href="#0" onClick={handleViewClick}>View</a></li>
+                              </ul>
+                          </li>
+                      ) : (
+                        isAdmin && (
+                        <li>
+                          <a href="#0" className={`clickable-section admin-button ${adminButtonDisabled ? 'disabled' : ''}`} onClick={handleAdminClick}>
+                              Admin
+                          </a>
+                        </li>
+                        )
+                      )}
+                  </ul>
+              </nav>
           </div>
         </div>
         {showWelcomeMessage && !isAdmin && (
@@ -1064,7 +1081,11 @@ const [demographicAnswers, setDemographicAnswers] = useState({
                       <li>Military Occupational Speciality: {militaryOccupationalSpeciality}</li>
                       <li>Amount of Siblings: {siblingsCount}</li>
                   </ul>
+                  
                   <div className='demographics-details-buttons-container'>
+                    <div className='demographics-details-buttons-description-container'>
+                    <p className='demographics-details-description'>Must press the "Save" button in order to save your changes!</p>
+                    </div>
                     {/* Direct alert on the button to test if it's being clicked */}
                     <button className="demographics-button-new" onClick={handleNewDemographicButtonClick}>New</button>
                     <button className="demographics-button-edit" onClick={() => setShowEditModal(true)}>Edit</button>
@@ -1109,7 +1130,23 @@ const [demographicAnswers, setDemographicAnswers] = useState({
                               />
                           </div>
                       </div>
-                      <button className='demographics-button-save' onClick={handleSaveDetailsButton}>Save</button>
+                      <button 
+                        className='demographics-button-save' 
+                        onClick={() => {
+                          if (selectedDetail && userDetails.hasOwnProperty(selectedDetail)) {
+                            setUserDetails(prevDetails => ({
+                              ...prevDetails,
+                              [selectedDetail]: newValue
+                            }));
+
+                            handleSaveDetailsButton();
+                          } else {
+                            console.warn(`Unknown detail selected: ${selectedDetail}`);
+                          }
+                        }}
+                      >
+                        Save
+                      </button>
                   </div>
               </div>
           )}

@@ -143,17 +143,7 @@
 
 
 /*Everything Below is pertaining to the hub area state of the web application*/
-.account{
-  margin-right: 1 0px;
-}
-.account:hover {
-  border:10px solid #fff; /* Set the border properties */
-  background-color: #fff; /* Set the background color */
-  color: #000; /* Set the text color */
-  border-radius: 5px;
-  align-items: center;
-  cursor: pointer;
-}
+
 
 .admin-login-container {
   /* ... other styles ... */
@@ -183,8 +173,8 @@
   text-align: center;
 }
 
-
 .hub-area {
+  z-index: 98;
   position: relative;
   height: 100vh;
   width: 100%;
@@ -193,61 +183,167 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  
 }
 
 .top-ribbon {
+  z-index: 100;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: #0091ff;
-  color: white;
   padding: 10px;
   border-radius: 5px;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  
+  height: 60px;  /* Adjust this value based on your design needs */
 }
 
 .ribbon-section {
+  z-index: 9999;
   display: flex;
   align-items: center;
+}
+
+.admin-buttons{
+  z-index: 9999;
 }
 
 .mipeace {
   font-size: 24px;
+  color: white;
   font-weight: bold;
   margin: 0;
+  margin-top: -10px;
 }
 
-.right-section {
+.ribbon-section-center {
+  z-index: 9999;
   display: flex;
   align-items: center;
 }
 
-.clickable-section {
-  margin-left: 20px;
-  cursor: pointer;
-  color: white;
-  z-index: 1;
+.ribbon-section-center body {
+  z-index: 9999;
+  background: #F9F8FD;
+  font-family: 'Lexend Exa', sans-serif;
 }
 
-.clickable-section:hover {
-  color:#525966;
+.ribbon-section-center nav {
+  z-index: 9999;
+  display: flex;
+  position: absolute;
+  justify-content: center;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-block;
+  border: 2px solid #EBECF1;
+  border-radius: 30px;
+  animation: slide-in 1s ease-out;
 }
 
-.admin-button {
-  background-color: #dc3545;
-  padding: 10px;
+.ribbon-section-center ul {
+  z-index: 9999;
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0 30px;
+  list-style-type: none;
+}
+
+.ribbon-section-center li:not(:last-child) {
+  z-index: 9999;
+  margin-right: 40px;
+}
+
+.ribbon-section-center li {
+  z-index: 9999;
+  border: 2px solid transparent;
   border-radius: 5px;
+  padding: 10px;
+  transition: background 0.2s;
 }
 
-.admin-button:hover {
-  background-color: #920513;
+.ribbon-section-center a, .ribbon-section-center div {
+  z-index: 9999;
+  color: white;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
   cursor: pointer;
 }
+
+.ribbon-section-center ul  ul {
+  z-index: 9999;
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  display: block;
+  margin: 12px -12px;
+  padding: 0;
+  background: #0091ff;
+  border: 2px solid #F7C833;
+  border-right: 2px solid #0091ff;
+  border-bottom: 2px solid #0091ff;
+  border-radius: 5px;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.ribbon-section-center ul ul li {
+  z-index: 9999;
+  margin: -2px 0 0 -2px;
+  width: calc(100% - 20px);
+  line-height: 1.7;
+}
+
+.ribbon-section-center ul ul li a, .ribbon-section-center ul ul li div {
+  z-index: 9999;
+  color: #2375D8;
+}
+
+.ribbon-section-center li:hover {
+  z-index: 9999;
+  background: #EC4138;
+  border: 2px solid #F05749;
+  border-right: 2px solid #E02A21;
+  border-bottom: 2px solid #E02A21;
+}
+
+.ribbon-section-center li:hover a, .ribbon-section-center li:hover div {
+  z-index: 9999;
+  color: #F9F8FD;
+}
+
+.ribbon-section-center li:hover ul {
+  z-index: 9999;
+  visibility: visible;
+  opacity: 1;
+  box-shadow: 0px 3px 5px 2px #EBECF1;
+}
+
+.ribbon-section-center li:hover ul li a, .ribbon-section-center li:hover ul li div {
+  z-index: 9999;
+  color: #F9F8FD;
+}
+
+@keyframes slide-in {
+  0% {
+    top: -50px;
+  }
+  40% {
+    top: 20px;
+  }
+  70% {
+    top: 10px;
+  }
+  100% {
+    top: 15px;
+  }
+}
+
 /* Everything below pertains to the Account Page that appears once and after the button is pressed*/
 .account-container {
   display: flex;
@@ -424,17 +520,8 @@
   }
 }
 /* Everything below pertains to the Test Page that appears once and after the button is pressed*/
-.test{
-  margin-right: 10px;
-}
-.test:hover {
-  border:10px solid #fff; /* Set the border properties */
-  background-color: #fff; /* Set the background color */
-  color: #000; /* Set the text color */
-  border-radius: 5px;
-  align-items: center;
-  cursor: pointer;
-}
+
+
 
 
 .test-order-container{
@@ -470,18 +557,7 @@
   background-color:#6ef5ff27;
 }
 
-.logout{
-  margin-left: 10px;
-}
 
-.logout:hover{
-  border:10px solid #fff; /* Set the border properties */
-  background-color: #fff; /* Set the background color */
-  color: #000; /* Set the text color */
-  border-radius: 5px;
-  align-items: center;
-  cursor: pointer;
-}
 /*Everything below is pertaining to the admin portion of the web application*/
 
 .admin-login-container {
@@ -1225,6 +1301,20 @@ body {
 
 .modal-questions span{
   border-bottom: 2px solid black;
+}
+
+@keyframes slowFlash {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.1; }
+  100% { opacity: 1; }
+}
+
+.demographics-details-description{
+  padding: 0;
+  margin-top: -2px;
+  font-size:15px;
+  margin-bottom: -2px;
+  animation: slowFlash 1.5s infinite; /* 2 seconds for a complete flash. Adjust as needed. */
 }
 
 /*For Responses*/
