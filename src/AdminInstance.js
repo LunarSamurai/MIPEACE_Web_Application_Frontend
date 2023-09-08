@@ -15,7 +15,6 @@ function AdminInstance() {
     const handleLogoutClick = () => {
         console.log("Logout was clicked!");
         localStorage.setItem('adminLoggedOut', 'true'); // Set a specific flag for admin logout
-        setRedirectToRootPage(true);
         window.location.reload();
     };
 
@@ -62,13 +61,7 @@ function AdminInstance() {
 
     return (
         <div className="AdminInstance">
-            <Router>
-                <Switch>
-                    <Route exact path="/adminInstance">
-                        <AdminControlPanel />
-                    </Route>
-                </Switch>
-            </Router>
+            {AdminControlPanel()}
         </div>
     );
 }

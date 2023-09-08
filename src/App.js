@@ -1,12 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Redirect, useLocation } from 'react-router-dom';
 import TestInstance from './TestInstance.js';
 import AdminInstance from './AdminInstance.js';
+import TestWebpage from './TestWebpage.js';
+import AdminWebpage from './AdminWebpage.js';
 import './App.css';  // Importing the styles
 import MIPEACE_Logo from './MIPEACE_LOGO.png'
 import { useHistory } from 'react-router-dom';
-import { redirect } from 'react-router';
 
+function RouteLogger() {
+  const location = useLocation();
+
+  useEffect(() => {
+      console.log(`Navigated to ${location.pathname}`);
+  }, [location]);
+
+  return null;  // This component doesn't render anything
+}
 
 function App() {
   // State Variables
@@ -17,36 +27,46 @@ function App() {
   const [redirectToTestInstance, setRedirectToTestInstance] = useState(false);
   const [redirectToAdminInstance, setRedirectToAdminInstance] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  localStorage.setItem('modalClosed', 'false');
+  const [redirectTo, setRedirectTo] = useState(localStorage.getItem('lastRoute') || "/");
 
+  useEffect(() => {
+    // If the route in the local storage isn't the root, then we redirect to the stored route.
+    if (redirectTo !== "/") {
+      setShowModal(false);
+    }
+  }, [redirectTo]);
   //Functions
   const handleGoToTestInstance = () => {
     console.log("Attempting to Testing redirect...");
     localStorage.setItem('modalClosed', 'true'); // Set the local storage value
+    localStorage.setItem('lastRoute', '/testInstance');
+    setRedirectTo(prev => '/testInstance');  // Use a functional update here
     console.log(localStorage.getItem('modalClosed'));
-    setRedirectToTestInstance(true);
-  };
+    console.log("RedirectTo from local storage:", localStorage.getItem('lastRoute'));
+    window.location.reload();
+};
+
 
   const handleGoToAdminInstance = () => {
     console.log("Attempting to Admin redirect...");
     localStorage.setItem('adminLoggedOut', 'false');
     localStorage.setItem('modalClosed', 'true'); // Set the local storage value
-    console.log(localStorage.getItem('modalClosed'));
-    setRedirectToAdminInstance(true);
+    console.log(localStorage.getItem('modalClosed', "lastroute"));
+    console.log("RedirectTo from local storage:", localStorage.getItem('lastRoute'));
+    setRedirectTo('/adminInstance');
   }
 
   //Modals, popups, other functions related to web-app movements
   const TypeSelectorModal = ({}) => {
-    if (redirectToTestInstance){
-      localStorage.setItem('modalClosed', 'false');
-      return <Redirect to="/testInstance" />
-    }else{
+    if (redirectTo === "/testInstance" && localStorage.getItem('modalClosed') === 'true') {
+      console.log("Redirecting to /testInstance from TypeSelectorModal");
+      return <Redirect to="/testInstance" />;
+  }
+    if (redirectTo === "/adminInstance") {
+      console.log("Redirecting to /adminInstance from TypeSelectorModal");
+      return <Redirect to="/adminInstance" />;
     }
-    if (redirectToAdminInstance){
-      localStorage.setItem('modalClosed', 'false');
-      return <Redirect to="/adminInstance" />
-    }else{
-    }
+    console.log("Showing Modal, no redirection");
     console.log(localStorage.getItem('modalClosed'));
     return (
       <div className="type-select-modal">
@@ -86,12 +106,10 @@ function App() {
   return (
     <div className="App">
       <Router>
+        <RouteLogger />
         <Switch>
           <Route exact path="/">
-            <TypeSelectorModal 
-              setShowModal={setShowModal} 
-              handleGoToTestInstance={handleGoToTestInstance}
-            />
+            <TypeSelectorModal />
           </Route>
           <Route path="/testInstance">
             {isLoading ? (
@@ -107,10 +125,16 @@ function App() {
               <AdminInstance />
             )}
           </Route>
+          <Route path="/test">
+            <TestWebpage />
+          </Route>
+          <Route path="/admin">
+            <AdminWebpage />
+          </Route>
         </Switch>
       </Router>
     </div>
-  );    
+  );
 }
 
 export default App;

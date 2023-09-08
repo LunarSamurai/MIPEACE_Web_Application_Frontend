@@ -230,7 +230,7 @@ function fetchTestFile(textFileName) {
         <h1 className="assessment-complete-message">Assessment Complete</h1>
         <p className="please-contact">Please contact your administrator for further assistance.</p>
         <div className="assessment-spacer">
-          <p className='.assessment-spacer-message'>
+          <p className='assessment-spacer-message'>
             We at the US Army Research Institute would like to thank you for coming out to our examination and Psychological assessment today. It was quiet the pleasure to have you
             here with us today. You have tremendously helped in our efforts in creating better leaders and better soldiers. We hope to see you again and we hope to hear your feedback!
             Please press "Return to Home" button on the bottom of the screen and logout once you get to the next screen. Many Thanks, US Army Research Institute.

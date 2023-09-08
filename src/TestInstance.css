@@ -87,6 +87,8 @@
   
   .Credentials-Req {
     color: #000000; /* Set the color to red (#ff0000) */
+    margin-top: 10px;
+    margin-bottom: 40px;
   }
   
   .signup-form {
@@ -94,7 +96,7 @@
     z-index: 2;
     width: 300px;
     padding: 20px;
-    padding-top: 0px;
+    padding-top: 10px;
     background-color: #f7f7f7;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -121,6 +123,10 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+  }
+
+  .signup-button{
+    margin-top: 10px;
   }
   
   .signup-button:hover {
@@ -244,6 +250,18 @@
     border-radius: 30px;
     animation: slide-in 1s ease-out;
   }
+
+  .ribbon-section-center nav ul li a {
+        display: block;
+        padding: 8px 16px; /* Adjust as necessary */
+        text-decoration: none; /* To remove the underline */
+    }
+
+    .ribbon-section-center nav ul li {
+        margin: 0;
+        padding: 0;
+    }
+
   
   .ribbon-section-center ul {
     z-index: 9999;
@@ -354,6 +372,8 @@
     padding: 20px;
     width: 100%;
     max-width: 800px;
+    margin-top: 270px;
+    margin-bottom: 0;
     background-color: #ffffff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
@@ -420,6 +440,7 @@
   .profile-picture-section {
     position: relative;
     margin-right: 50px;
+    margin-top: -330px;
   }
   
   .profile-image {
@@ -456,16 +477,21 @@
     margin-bottom: 10px;
   }
   
-  .cac-id {
-    font-size: 24px;
+  .profile-title {
+    font-size: 35px;
     font-weight: bold;
-    margin: 0;
+    border-bottom: solid black;
   }
   
   .name-details {
     font-size: 18px;
     color: #555555;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    padding: 2px;
+  }
+
+  .name-details p{
+    margin-bottom: 5px;
   }
   
   /* Banner section styling */
@@ -522,17 +548,25 @@
   }
   /* Everything below pertains to the Test Page that appears once and after the button is pressed*/
   
-  
-  
-  
   .test-order-container{
     display: center;
     align-items: center;
     width: 100%;
-    border-bottom: 2px solid #007bff;
+    border-bottom: 50px solid #007bff;
     margin-bottom: 20px;
   }
   
+  .test-container-header{
+    font-size: 45px;
+    margin-bottom: 650px;
+    margin-top: 50px;
+    border-bottom: solid #007bff;
+  }
+
+  .test-completion-amount-container-title{
+    margin-top: 600px;
+  }
+
   .test-order-container-title{
     font-size: 20px;
   }
@@ -550,14 +584,38 @@
   }
   
   .take-test-button{
-    font-size: 20px;
-    border-radius: 5px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+    animation: take-test-flashGlow 2s infinite;
   }
   
   .take-test-button:hover{
-    background-color:#6ef5ff27;
+    background-color: #0056b3;
   }
   
+  @keyframes take-test-flashGlow {
+    0% {
+        box-shadow: 0 0 5px 5px #00b7ff;
+        text-shadow: 0 0 5px #00b7ff;
+    }
+    50% {
+        box-shadow: 0 0 10px 10px #00b7ff;
+        text-shadow: 0 0 5px #00b7ff;
+    }
+    100% {
+        box-shadow: 0 0 5px 5px #00b7ff;
+        text-shadow: 0 0 5px #00b7ff;
+    }
+}
+
+
   
   /*Everything below is pertaining to the admin portion of the web application*/
   
@@ -916,6 +974,7 @@
     font-size: 30px;
     font-weight: bold;
     padding-bottom: 30px;
+
   }
   
   .demographics-details {
@@ -937,7 +996,39 @@
     text-align: left;
     padding: 5px 0;
   }
-  
+
+  .account-page-demographics-title{
+    margin-top: 20px;
+    font-size: 35px;
+    border-bottom: solid black;
+  }
+
+  .account-page-demographics-list{
+    margin-top: 10px;
+  }
+
+  .account-page-list-of-demographics li {
+    font-size: 18px;
+    color: #555555;
+    margin-bottom: 1px;
+    padding: 2px;
+  }
+
+  .demographics-see-details-button{
+    margin-top: 50px;
+    padding: 10px 5px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .demographics-see-details-button:hover{
+    background-color: #0056b3;
+  }
   
   /*Demographics Edit Page*/
   .demographics-edit-modal-editing-container{
@@ -984,11 +1075,24 @@
     border-radius: 4px;
   }
   
-  
+  @keyframes no-records-flash {
+    0%   { opacity: 1; }
+    50%  { opacity: 0.15; }
+    100% { opacity: 1; }
+}
+
+.no-records-found {
+    margin-top: 10px;
+    color: red;
+    animation: no-records-flash 2s infinite; /* 2s duration creates a slow flash */
+}
+
+
   .menu {
     display: flex;
     justify-content: center;
     list-style-type: none;
+    margin-top: 20px;
     margin-bottom: 200px;
     margin-right: 30px;
   }
@@ -1312,7 +1416,7 @@
   
   .demographics-details-description{
     padding: 0;
-    margin-top: -2px;
+    margin-top: 2px;
     font-size:15px;
     margin-bottom: -2px;
     animation: slowFlash 1.5s infinite; /* 2 seconds for a complete flash. Adjust as needed. */

@@ -332,6 +332,8 @@
   } 
 
   .assessment-spacer-message{
+    margin-top: 25px;
+    line-height: 1.5;
     color: black;
   }
 

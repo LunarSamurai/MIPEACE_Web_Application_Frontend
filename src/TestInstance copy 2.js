@@ -7,6 +7,7 @@ import TestWebpage from './TestWebpage.js';
 import AdminWebpage from './AdminWebpage.js';
 import defaultProfileImage from './defaultProfileImage.jpg';
 import defaultBannerImage from './defaultBannerImage.jpg';
+import { redirect } from 'react-router';
 import { useHistory } from 'react-router-dom';
 
 
@@ -136,6 +137,32 @@ const [userDetails, setUserDetails] = useState({
 });
 
   useEffect(() => {
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    console.log("isAdmin from localStorage: ", isAdmin); // log to the console
+    setIsAdmin(isAdmin);
+    setIsLoading(false);
+    const currentCompletionStatus = sessionStorage.getItem('assessmentComplete');
+    if(currentCompletionStatus == 'Completed'){
+      setCompletionStatus('Completed');
+    }
+    else if(currentCompletionStatus == 'In Progress'){
+      setCompletionStatus('In Progress');
+    }
+    else{
+      setCompletionStatus('Not Started Yet');
+      
+    }
+    if(sessionStorage.length > 0){
+      setShowSignup(false);
+      setShowLogo(false);
+      setSubmitted(true);
+    }else{
+      sessionStorage.clear();
+      localStorage.clear();
+    };
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setShowSignup(true);
     }, 1250);
@@ -143,6 +170,18 @@ const [userDetails, setUserDetails] = useState({
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (adminLoginAttempts >= MAX_LOGIN_ATTEMPTS) {
+      setAdminButtonDisabled(true);
+      setShowAdminLogin(false);
+      const lockoutTimer = setTimeout(() => {
+        setAdminButtonDisabled(false);
+        setAdminLoginAttempts(0);
+        setAdminAttemptsLeft(MAX_LOGIN_ATTEMPTS);
+      }, LOCKOUT_DURATION);
+      return () => clearTimeout(lockoutTimer);
+    }
+  }, [adminLoginAttempts]);
 
   useEffect(() => {
     // Retrieve values from SessionStorage
@@ -230,7 +269,8 @@ const [userDetails, setUserDetails] = useState({
   };
   
   
-  const handleTakeTestButton = () => {
+  const handleTakeTestButton = (event) => {
+    event.preventDefault();
     const testIsCompleted =  sessionStorage.getItem('assessmentComplete');
     if(testIsCompleted == 'Completed'){
       setCompletionStatus('Completed');
@@ -243,7 +283,8 @@ const [userDetails, setUserDetails] = useState({
     }
   }
 
-  const handleAccountClick = () => {
+  const handleAccountClick = (event) => {
+    event.preventDefault();
     setAccountScreen(true);
     setShowWelcomeMessage(false);
     setShowTakeTest(false);
@@ -423,9 +464,8 @@ const [userDetails, setUserDetails] = useState({
     event.preventDefault(); 
     sessionStorage.clear();
     localStorage.setItem('modalClosed', 'false');
-    localStorage.setItem('lastRoute', '/');  // Resetting the lastRoute to root
     console.log(localStorage.getItem('modalClosed'));
-    console.log("RedirectTo from local storage:", localStorage.getItem('lastRoute'));
+    setRedirectToRootPage(true);
     history.push('/');
   }
 
@@ -800,7 +840,363 @@ const [userDetails, setUserDetails] = useState({
       </div>
     </div>
   );
+
+  const renderNewContainer = () => {
+    if (showNewContainer) {
+      return (
+        <div className="new-container">
+          <h1 className = "new-h1">Want to add new files to the test pool?</h1>
+          <div className = "Spacer_section">
+            <h3 className = "new-spacer-title">Current List</h3>
+            <ul>
+              {fileNames.map((fileName) => (
+              <li key={fileName}>{fileName}</li>
+              ))}
+            </ul>
+          </div>
+          <p className = "directory-message">Please press "upload" twice for updated list.</p>
+          <label htmlFor="file-upload" className="custom-file-input-button">
+            {selectedFileName || 'Choose file'}
+          </label>
+          <input
+            type="file"
+            id="file-upload"
+            className="file-input"
+            onChange={handleFileInputChange}
+            accept=".txt"
+           />
+          <button className = "upload-button" onClick={handleFileUpload}>
+            Upload
+          </button>
+        </div>
+      );
+    }
+    return null;
+  };
+
   
+  const renderEditContainer = () => {
+    if (showEditContainer) {
+      return (
+        <div className="edit-current-test-pool-container">
+          <h1 className="edit-current-test-pool-header">Edit Current Test Pool</h1>
+          <div className="current-list-container">
+            <h3 className="current-list-title">Current List</h3>
+            <ul className = "editTestPoolList">
+              {fileNames.map((fileName, index) => (
+                <li key={index}>{fileName}</li>
+              ))}
+            </ul>
+          </div>
+          <h3 className="edit-bottom-title">
+            Randomized Testing: 
+          </h3>
+          {sessionStorage.getItem('isRandomizedEnabled') === 'true' ? (
+              <p className="randomize-state-true">Enabled</p>
+            ) : (
+              <p className="randomize-state-false">False</p>
+            )}
+          <div className = "bottom-buttons">
+          <button className="edit-button" onClick={handleEditButtonClick}>
+            Edit
+          </button>
+          <button className="reload-button" onClick={handleEditClick}>
+            Reload
+          </button>
+          <button className = "randomize-button" onClick={handleRandomizeClick}>
+            Randomize
+          </button>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderEditTestPoolContainer = () => {
+    if (showEditTestPoolContainer) {
+      return (
+        <div className="edit-test-pool-container">
+          <div className="edit-test-pool-content">
+            <div className="edit-test-pool-form">
+              <form onSubmit={handleRemoveButtonClick}>
+                <h1 className="edit-test-pool-header">Edit the Test Pool</h1>
+                <div className="amount-input-container">
+                  <label htmlFor="test-dropdown" className="amount-input">
+                    Items to remove:
+                  </label>
+                  {selectedTests.map((selectedTest, index) => (
+                    <select
+                      key={`select_${index}`}
+                      className="form-select"
+                      onChange={(event) => handleTestSelection(event, index)}
+                      value={selectedTest}
+                    >
+                      <option value="">
+                        -- Select a test --
+                      </option>
+                      {tests.length > 0 &&
+                        tests.map((test) => (
+                          <option key={test.id} value={test.id}>
+                            {test.name}
+                          </option>
+                        ))}
+                    </select>
+                  ))}
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="num-of-tests" className="form-label">
+                    Number of Tests in Sequence:
+                  </label>
+                  <input
+                    type="number"
+                    id="num-of-tests"
+                    name="num-of-tests"
+                    className="form-control"
+                    value={numOfTests}
+                    onChange={handleUpdateNumOfTests}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleUpdateTests}
+                  >
+                    Update
+                  </button>
+                </div>
+                <button className="remove-button" 
+                 onClick={(event) => handleRemoveButtonClick(event)} // Pass the event object here
+                 >
+                  Remove
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderShowTakeTest = () => {
+    <div className="take-test-container">
+      <h1 className="test-container-header">Army Research Institute Testing System</h1>
+      <div className="test-completion-amount-container">
+        <p className="test-completion-amount-container-title">Current Completion: {completionStatus}</p>
+      </div>
+      <button className="take-test-button" onClick={handleTakeTestButton}>Take the test</button>
+    </div>
+
+    return null;
+  }
+
+  const renderShowAccountScreen = () => {
+    <div className="account-container">
+      <div className="profile-section">
+        <div className="banner-section">
+          {bannerImage ? (
+            <img src={bannerImage} alt="Banner" className="banner-image" />
+          ) : (
+            <img src={defaultBannerImage} alt="Default Banner" className="default-banner" />
+          )}
+          <button className="edit-banner" onClick={handleEditBannerClick}>
+            Edit
+          </button>
+        </div>
+      </div>
+      <div className="profile-divider-section">
+        <div className="profile-picture-section">
+          {profilePicture ? (
+            <img src={profilePicture} alt="Profile" className="profile-image" />
+          ) : (
+            <img src={defaultProfileImage} alt="Default Profile" className="default-profile" />
+          )}
+          <button className="edit-profile" onClick={handleEditProfileClick}>
+            Edit Profile Picture
+          </button>
+          <input
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleBannerImageChange}
+            ref={bannerInputRef}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleProfilePictureChange}
+            ref={profileInputRef}
+          />
+        </div>
+        <div className="account-details">
+          <div className="header">
+            <h1 className="profile-title">Profile</h1>
+          </div>
+          <div className="name-details">
+              <p>CAC ID: {cacid}</p>
+              <p>First Name: {firstName}</p>
+              <p>Middle Name: {middleName}</p>
+              <p>Last Name: {lastName}</p>
+          </div>
+          <div className="demographics">
+            <h3 className="account-page-demographics-title">Demographics</h3>
+            <div className="account-page-demographics-list">
+            <ul className='account-page-list-of-demographics'>
+                <li>Duty Status: {dutyStatus || "N/A"}</li>
+                <li>Age: {age || "N/A"}</li>
+                <li>Marital Status: {maritalStatus || "N/A"}</li>
+                <li>Grade: {grade || "N/A"}</li>
+                <li>Sex: {sex || "N/A"}</li>
+                <li>Handedness: {handedness || "N/A"}</li>
+                <li>Height: {height || "N/A"}</li>
+                <li>Weight: {weight || "N/A"}</li>
+                <li>Military Occupational Speciality: {militaryOccupationalSpeciality || "N/A"}</li>
+                <li>Amount of Siblings: {siblingsCount || "N/A"}</li>
+            </ul>
+            {(!dutyStatus || !age || !maritalStatus || !grade || !sex || !handedness || !height || !weight || !militaryOccupationalSpeciality || !siblingsCount) && (
+                  <p className="no-records-found">Please Press Edit Details to Add Records</p>
+              )}
+            </div>
+            <button className="demographics-see-details-button" onClick={() => setShowDemographicsDetails(true)}>Edit Details</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    return null;
+    }
+    
+    const renderShowDemographicsDetails = () => {
+        <div className="demographics-overlay" onClick={() => setShowDemographicsDetails(false)}>
+            <div className="demographics-details" onClick={(e) => e.stopPropagation()}>
+                <div className="demographics-title">
+                  <span>Demographics Details</span>
+                </div>
+                <ul className='list-of-demographics'>
+                    <li>Duty Status: {dutyStatus}</li>
+                    <li>Age: {age}</li>
+                    <li>Marital Status: {maritalStatus}</li>
+                    <li>Grade: {grade}</li>
+                    <li>Sex: {sex}</li>
+                    <li>Handedness: {handedness}</li>
+                    <li>Height: {height}</li>
+                    <li>Weight: {weight}</li>
+                    <li>Military Occupational Speciality: {militaryOccupationalSpeciality}</li>
+                    <li>Amount of Siblings: {siblingsCount}</li>
+                </ul>
+                <div className='demographics-details-buttons-container'>
+                  <div className='demographics-details-buttons-description-container'>
+                  <p className='demographics-details-description'>Must press the "Save" button in order to save your changes!</p>
+                  </div>
+                  {/* Direct alert on the button to test if it's being clicked */}
+                  <button className="demographics-button-new" onClick={handleNewDemographicButtonClick}>New</button>
+                  <button className="demographics-button-edit" onClick={() => setShowEditModal(true)}>Edit</button>
+                  <button 
+                      className='demographics-button-save' 
+                      onClick={handleSaveAllDetailsButton}
+                  >
+                      Save
+                  </button>
+                </div>
+            </div>
+        </div>
+        return null;
+        }
+        const renderShowEditModal = () => {
+            <div className="edit-overlay" onClick={() => setShowEditModal(false)}>
+                <div className="edit-details" onClick={(e) => e.stopPropagation()}>
+                    <div className='demographics-edit-modal-title'>
+                        <span>Please choose an attribute to change:</span>
+                    </div>
+                    <div className='demographics-edit-modal-editing-container center-container'>
+                        <ul className="menu clearfix">
+                            <li className="parent">
+                                <a href="#">Demographics</a>
+                                <ul className="children">
+                                    <li onClick={() => handleListClick('dutyStatus', 'Duty Status')} style={selectedDetail === 'dutyStatus' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Duty Status</a></li>
+                                    <li onClick={() => handleListClick('age', 'Age')} style={selectedDetail === 'age' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Age</a></li>
+                                    <li onClick={() => handleListClick('maritalStatus', 'Marital Status')} style={selectedDetail === 'maritalStatus' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Marital Status</a></li>
+                                    <li onClick={() => handleListClick('grade', 'Grade')} style={selectedDetail === 'grade' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Grade</a></li>
+                                    <li onClick={() => handleListClick('sex', 'Sex')} style={selectedDetail === 'sex' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Sex</a></li>
+                                    <li onClick={() => handleListClick('handedness', 'Handedness')} style={selectedDetail === 'handedness' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Handedness</a></li>
+                                    <li onClick={() => handleListClick('height', 'Height')} style={selectedDetail === 'height' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Height</a></li>
+                                    <li onClick={() => handleListClick('weight', 'Weight')} style={selectedDetail === 'weight' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Weight</a></li>
+                                    <li onClick={() => handleListClick('militaryOccupationalSpeciality', 'Military Occupational Speciality')} style={selectedDetail === 'militaryOccupationalSpeciality' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Military Occupational Speciality</a></li>
+                                    <li onClick={() => handleListClick('siblingsCount', 'Amount of Siblings')} style={selectedDetail === 'siblingsCount' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Amount of Siblings</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <div className="input-container">
+                          <div className='current-selected-demographic'>
+                              <small>Currently Selected Demographic: <span>{selectedDemographic}</span></small>
+                          </div>
+                            <input className='demographics-edit-input'
+                                type="text"
+                                value={newValue}
+                                onChange={(e) => setNewValue(e.target.value)}
+                                placeholder="Enter new value"
+                            />
+                        </div>
+                    </div>
+                    <button 
+                      className='demographics-button-save' 
+                      onClick={() => {
+                        if (selectedDetail && userDetails.hasOwnProperty(selectedDetail)) {
+                          setUserDetails(prevDetails => ({
+                            ...prevDetails,
+                            [selectedDetail]: newValue
+                          }));
+
+                          handleSaveDetailsButton();
+                        } else {
+                          console.warn(`Unknown detail selected: ${selectedDetail}`);
+                        }
+                      }}
+                    >
+                      Save
+                    </button>
+                </div>
+            </div>
+            }
+        const renderShowNewDemographicModal = () =>{
+              <div className="new-overlay">
+                  <div 
+                      className="new-demographic-modal" 
+                      onClick={() => setShowNewDemographicModal(false)}
+                  >
+                      <div 
+                          className="modal-content"
+                          onClick={(e) => e.stopPropagation()}
+                      >
+                          <p className='modal-questions'><span>{demographicQuestions[questionIndex].question}</span></p>
+                          <div className='demographics-new-input-container'>
+                              <p className='description'>Please enter your value below:</p>
+                              <input 
+                                  type="text"
+                                  className="demographics-input"
+                                  value={inputValue}
+                                  onChange={(e) => setInputValue(e.target.value)}
+                              />
+                              <button 
+                                  className="close-button" 
+                                  onClick={handleNextButtonClick}>
+                                  Next
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          }
+        {responseMessage && (
+            <MessageModal
+                message={responseMessage}
+                onClose={() => setResponseMessage(null)}
+            />
+        )}
+      {renderNewContainer()} 
+      {renderEditContainer()}
+      {renderEditTestPoolContainer()}
+      
   const renderHubArea = () => {
     if (redirectToAdmin) {
         return <Redirect to="/admin" />;
@@ -811,155 +1207,16 @@ const [userDetails, setUserDetails] = useState({
     if (redirectToRootPage){
         return <Redirect to="/" />
     }
-    const renderNewContainer = () => {
-      if (showNewContainer) {
-        return (
-          <div className="new-container">
-            <h1 className = "new-h1">Want to add new files to the test pool?</h1>
-            <div className = "Spacer_section">
-              <h3 className = "new-spacer-title">Current List</h3>
-              <ul>
-                {fileNames.map((fileName) => (
-                <li key={fileName}>{fileName}</li>
-                ))}
-              </ul>
-            </div>
-            <p className = "directory-message">Please press "upload" twice for updated list.</p>
-            <label htmlFor="file-upload" className="custom-file-input-button">
-              {selectedFileName || 'Choose file'}
-            </label>
-            <input
-              type="file"
-              id="file-upload"
-              className="file-input"
-              onChange={handleFileInputChange}
-              accept=".txt"
-             />
-            <button className = "upload-button" onClick={handleFileUpload}>
-              Upload
-            </button>
-          </div>
-        );
-      }
-      return null;
-    };
+    if(localStorage.getItem('modalClosed') === "false"){
+        return <Redirect to="/" />
+    }
 
-    const renderEditContainer = () => {
-      if (showEditContainer) {
-        return (
-          <div className="edit-current-test-pool-container">
-            <h1 className="edit-current-test-pool-header">Edit Current Test Pool</h1>
-            <div className="current-list-container">
-              <h3 className="current-list-title">Current List</h3>
-              <ul className = "editTestPoolList">
-                {fileNames.map((fileName, index) => (
-                  <li key={index}>{fileName}</li>
-                ))}
-              </ul>
-            </div>
-            <h3 className="edit-bottom-title">
-              Randomized Testing: 
-            </h3>
-            {sessionStorage.getItem('isRandomizedEnabled') === 'true' ? (
-                <p className="randomize-state-true">Enabled</p>
-              ) : (
-                <p className="randomize-state-false">False</p>
-              )}
-            <div className = "bottom-buttons">
-            <button className="edit-button" onClick={handleEditButtonClick}>
-              Edit
-            </button>
-            <button className="reload-button" onClick={handleEditClick}>
-              Reload
-            </button>
-            <button className = "randomize-button" onClick={handleRandomizeClick}>
-              Randomize
-            </button>
-            </div>
-          </div>
-        );
-      }
-      return null;
-    };
-  
-    const renderEditTestPoolContainer = () => {
-
-      if (showEditTestPoolContainer) {
-        return (
-          <div className="edit-test-pool-container">
-            <div className="edit-test-pool-content">
-              <div className="edit-test-pool-form">
-                <form onSubmit={handleRemoveButtonClick}>
-                  <h1 className="edit-test-pool-header">Edit the Test Pool</h1>
-                  <div className="amount-input-container">
-                    <label htmlFor="test-dropdown" className="amount-input">
-                      Items to remove:
-                    </label>
-                    {selectedTests.map((selectedTest, index) => (
-                      <select
-                        key={`select_${index}`}
-                        className="form-select"
-                        onChange={(event) => handleTestSelection(event, index)}
-                        value={selectedTest}
-                      >
-                        <option value="">
-                          -- Select a test --
-                        </option>
-                        {tests.length > 0 &&
-                          tests.map((test) => (
-                            <option key={test.id} value={test.id}>
-                              {test.name}
-                            </option>
-                          ))}
-                      </select>
-                    ))}
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="num-of-tests" className="form-label">
-                      Number of Tests in Sequence:
-                    </label>
-                    <input
-                      type="number"
-                      id="num-of-tests"
-                      name="num-of-tests"
-                      className="form-control"
-                      value={numOfTests}
-                      onChange={handleUpdateNumOfTests}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={handleUpdateTests}
-                    >
-                      Update
-                    </button>
-                  </div>
-                  <button className="remove-button" 
-                   onClick={(event) => handleRemoveButtonClick(event)} // Pass the event object here
-                   >
-                    Remove
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        );
-      }
-      return null;
-    };
-      
-    const sortedTestOrders = testOrders.sort((a, b) => a.test_order_number - b.test_order_number);
     return (
       <div className={`hub-area ${isAdmin ? 'admin-mode' : ''}`}>
         <div className="top-ribbon">
           <div className="ribbon-section">
             <div className="mipeace">MIPEACE</div>
           </div>
-          {showAdminLockoutMessage && (
-            <h1 className="admin-lockout-message">
-              You have entered the wrong admin credentials. Please try again in 30 minutes.
-            </h1>
-          )}
           <div className="ribbon-section-center">
               <nav>
                   <ul>
@@ -994,241 +1251,6 @@ const [userDetails, setUserDetails] = useState({
             Welcome, <span className="nickname">{firstName}</span>!
           </div>
         )}
-        {!showWelcomeMessage && showLogo && (
-          <div className="center-logo">
-            <img src={logo} className="testInstance-logo" alt="logo" />
-          </div>
-        )}
-        {isAdmin && !showWelcomeMessage && !showLogo && (
-          <div className="admin-welcome-message">Welcome Admin!</div>
-        )}
-        {showTakeTest && !isAdmin &&(
-          <div className="take-test-container">
-            <h1 className="test-container-header">Army Research Institute Testing System</h1>
-            <div className="test-completion-amount-container">
-              <p className="test-completion-amount-container-title">Current Completion: {completionStatus}</p>
-            </div>
-            <button className="take-test-button" onClick={handleTakeTestButton}>Take the test</button>
-          </div>
-        )}
-        {showTakeTest && isAdmin && (
-          <div className="take-test-container">
-            <h1 className="test-container-header">Army Research Institute Testing System</h1>
-            <div className="test-order-container">
-              <p className="test-order-container-title">Current Test Order: </p>
-              <ul className="test-order-list">
-              {sortedTestOrders.map((testOrder) => (
-                <li key={testOrder.id} className="test-order-item">
-                  &bull; {testOrder.text_file_name}
-                </li>
-              ))}
-            </ul>
-            </div>
-            <button className="take-test-button" onClick={handleTakeTestButton}>Take the test</button>
-          </div>
-        )}
-        {showAccountScreen && (
-          <div className="account-container">
-            <div className="profile-section">
-              <div className="banner-section">
-                {bannerImage ? (
-                  <img src={bannerImage} alt="Banner" className="banner-image" />
-                ) : (
-                  <img src={defaultBannerImage} alt="Default Banner" className="default-banner" />
-                )}
-                <button className="edit-banner" onClick={handleEditBannerClick}>
-                  Edit
-                </button>
-              </div>
-            </div>
-            <div className="profile-divider-section">
-              <div className="profile-picture-section">
-                {profilePicture ? (
-                  <img src={profilePicture} alt="Profile" className="profile-image" />
-                ) : (
-                  <img src={defaultProfileImage} alt="Default Profile" className="default-profile" />
-                )}
-                <button className="edit-profile" onClick={handleEditProfileClick}>
-                  Edit Profile Picture
-                </button>
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={handleBannerImageChange}
-                  ref={bannerInputRef}
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={handleProfilePictureChange}
-                  ref={profileInputRef}
-                />
-              </div>
-              <div className="account-details">
-                <div className="header">
-                  <h1 className="profile-title">Profile</h1>
-                </div>
-                <div className="name-details">
-                    <p>CAC ID: {cacid}</p>
-                    <p>First Name: {firstName}</p>
-                    <p>Middle Name: {middleName}</p>
-                    <p>Last Name: {lastName}</p>
-                </div>
-                <div className="demographics">
-                  <h3 className="account-page-demographics-title">Demographics</h3>
-                  <div className="account-page-demographics-list">
-                  <ul className='account-page-list-of-demographics'>
-                      <li>Duty Status: {dutyStatus || "N/A"}</li>
-                      <li>Age: {age || "N/A"}</li>
-                      <li>Marital Status: {maritalStatus || "N/A"}</li>
-                      <li>Grade: {grade || "N/A"}</li>
-                      <li>Sex: {sex || "N/A"}</li>
-                      <li>Handedness: {handedness || "N/A"}</li>
-                      <li>Height: {height || "N/A"}</li>
-                      <li>Weight: {weight || "N/A"}</li>
-                      <li>Military Occupational Speciality: {militaryOccupationalSpeciality || "N/A"}</li>
-                      <li>Amount of Siblings: {siblingsCount || "N/A"}</li>
-                  </ul>
-                  {(!dutyStatus || !age || !maritalStatus || !grade || !sex || !handedness || !height || !weight || !militaryOccupationalSpeciality || !siblingsCount) && (
-                        <p className="no-records-found">Please Press Edit Details to Add Records</p>
-                    )}
-                  </div>
-                  <button className="demographics-see-details-button" onClick={() => setShowDemographicsDetails(true)}>Edit Details</button>
-                </div>
-              </div>
-            </div>
-          </div>)}
-          {showDemographicsDetails && (
-          <div className="demographics-overlay" onClick={() => setShowDemographicsDetails(false)}>
-              <div className="demographics-details" onClick={(e) => e.stopPropagation()}>
-                  <div className="demographics-title">
-                    <span>Demographics Details</span>
-                  </div>
-                  <ul className='list-of-demographics'>
-                      <li>Duty Status: {dutyStatus}</li>
-                      <li>Age: {age}</li>
-                      <li>Marital Status: {maritalStatus}</li>
-                      <li>Grade: {grade}</li>
-                      <li>Sex: {sex}</li>
-                      <li>Handedness: {handedness}</li>
-                      <li>Height: {height}</li>
-                      <li>Weight: {weight}</li>
-                      <li>Military Occupational Speciality: {militaryOccupationalSpeciality}</li>
-                      <li>Amount of Siblings: {siblingsCount}</li>
-                  </ul>
-                  <div className='demographics-details-buttons-container'>
-                    <div className='demographics-details-buttons-description-container'>
-                    <p className='demographics-details-description'>Must press the "Save" button in order to save your changes!</p>
-                    </div>
-                    {/* Direct alert on the button to test if it's being clicked */}
-                    <button className="demographics-button-new" onClick={handleNewDemographicButtonClick}>New</button>
-                    <button className="demographics-button-edit" onClick={() => setShowEditModal(true)}>Edit</button>
-                    <button 
-                        className='demographics-button-save' 
-                        onClick={handleSaveAllDetailsButton}
-                    >
-                        Save
-                    </button>
-                  </div>
-              </div>
-          </div>
-          )}
-          {showEditModal && (
-              <div className="edit-overlay" onClick={() => setShowEditModal(false)}>
-                  <div className="edit-details" onClick={(e) => e.stopPropagation()}>
-                      <div className='demographics-edit-modal-title'>
-                          <span>Please choose an attribute to change:</span>
-                      </div>
-                      <div className='demographics-edit-modal-editing-container center-container'>
-                          <ul className="menu clearfix">
-                              <li className="parent">
-                                  <a href="#">Demographics</a>
-                                  <ul className="children">
-                                      <li onClick={() => handleListClick('dutyStatus', 'Duty Status')} style={selectedDetail === 'dutyStatus' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Duty Status</a></li>
-                                      <li onClick={() => handleListClick('age', 'Age')} style={selectedDetail === 'age' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Age</a></li>
-                                      <li onClick={() => handleListClick('maritalStatus', 'Marital Status')} style={selectedDetail === 'maritalStatus' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Marital Status</a></li>
-                                      <li onClick={() => handleListClick('grade', 'Grade')} style={selectedDetail === 'grade' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Grade</a></li>
-                                      <li onClick={() => handleListClick('sex', 'Sex')} style={selectedDetail === 'sex' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Sex</a></li>
-                                      <li onClick={() => handleListClick('handedness', 'Handedness')} style={selectedDetail === 'handedness' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Handedness</a></li>
-                                      <li onClick={() => handleListClick('height', 'Height')} style={selectedDetail === 'height' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Height</a></li>
-                                      <li onClick={() => handleListClick('weight', 'Weight')} style={selectedDetail === 'weight' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Weight</a></li>
-                                      <li onClick={() => handleListClick('militaryOccupationalSpeciality', 'Military Occupational Speciality')} style={selectedDetail === 'militaryOccupationalSpeciality' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Military Occupational Speciality</a></li>
-                                      <li onClick={() => handleListClick('siblingsCount', 'Amount of Siblings')} style={selectedDetail === 'siblingsCount' ? { backgroundColor: '#e0e0e0' } : {}}><a href="#">Amount of Siblings</a></li>
-                                  </ul>
-                              </li>
-                          </ul>
-                          <div className="input-container">
-                            <div className='current-selected-demographic'>
-                                <small>Currently Selected Demographic: <span>{selectedDemographic}</span></small>
-                            </div>
-                              <input className='demographics-edit-input'
-                                  type="text"
-                                  value={newValue}
-                                  onChange={(e) => setNewValue(e.target.value)}
-                                  placeholder="Enter new value"
-                              />
-                          </div>
-                      </div>
-                      <button 
-                        className='demographics-button-save' 
-                        onClick={() => {
-                          if (selectedDetail && userDetails.hasOwnProperty(selectedDetail)) {
-                            setUserDetails(prevDetails => ({
-                              ...prevDetails,
-                              [selectedDetail]: newValue
-                            }));
-
-                            handleSaveDetailsButton();
-                          } else {
-                            console.warn(`Unknown detail selected: ${selectedDetail}`);
-                          }
-                        }}
-                      >
-                        Save
-                      </button>
-                  </div>
-              </div>
-          )}
-            {showNewDemographicModal && (
-                <div className="new-overlay">
-                    <div 
-                        className="new-demographic-modal" 
-                        onClick={() => setShowNewDemographicModal(false)}
-                    >
-                        <div 
-                            className="modal-content"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <p className='modal-questions'><span>{demographicQuestions[questionIndex].question}</span></p>
-                            <div className='demographics-new-input-container'>
-                                <p className='description'>Please enter your value below:</p>
-                                <input 
-                                    type="text"
-                                    className="demographics-input"
-                                    value={inputValue}
-                                    onChange={(e) => setInputValue(e.target.value)}
-                                />
-                                <button 
-                                    className="close-button" 
-                                    onClick={handleNextButtonClick}>
-                                    Next
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-          {responseMessage && (
-              <MessageModal
-                  message={responseMessage}
-                  onClose={() => setResponseMessage(null)}
-              />
-          )}
-        {renderNewContainer()} 
-        {renderEditContainer()}
-        {renderEditTestPoolContainer()}
       </div>
     );
   };
@@ -1282,20 +1304,25 @@ const [userDetails, setUserDetails] = useState({
     </div>
   );
 
+  
   return (
     <div className="testInstance">
-        {!showSignup && !submitted && (
+        {!showSignup && !submitted ? (
             <header className="testInstance-header">
                 <img src={logo} className="testInstance-logo" alt="logo" />
                 <p>Welcome to the Psychological Exam</p>
             </header>
-        )}
-        {showSignup && !submitted && renderSignupForm()}
+        ) : null}
+        {showSignup && !submitted ? renderSignupForm() : null}
         {submitted && renderHubArea()}
         {showAdminLogin && renderAdminLogin()}
+        {showAccountScreen && renderShowAccountScreen()}
+        {showTestScreen && renderShowTakeTest()}
+        {showDemographicsDetails && renderShowDemographicsDetails()}
+        {showEditModal && renderShowEditModal()}
+        {showNewDemographicModal && renderShowNewDemographicModal()}
     </div>
-);
-
+    );
 }
 
 export default TestInstance;
