@@ -12,6 +12,490 @@ body {
     overflow: hidden;
 }
 
+.admin-control-panel-wrapper {
+    display: flex;
+    width: 100%;
+}
+
+.modal-area {
+    margin-left: 160px;
+    flex: 1; // This will make it take up the remaining width
+    background-color: rgb(255, 255, 255);
+    display: flex; // Used to center the modal
+    justify-content: center; // Center modal horizontally
+    align-items: center; // Center modal vertically
+    width: 100vw;
+    height: 100vh;
+    z-index:1;
+}
+
+.top-admin-ribbon {
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #0091ff;
+    padding: 10px;
+    border-radius: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;  /* Adjust this value based on your design needs */
+}
+
+.main-editing-modal nav {
+    z-index: 9999;
+    display: flex;
+    position: absolute;
+    justify-content: center;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-block;
+    border: 2px solid #EBECF1;
+    border-radius: 30px;
+    animation: slide-in 1s ease-out;
+  }
+
+  .main-editing-modal nav ul li a {
+        display: block;
+        padding: 8px 16px; /* Adjust as necessary */
+        text-decoration: none; /* To remove the underline */
+    }
+
+    .main-editing-modal nav ul li {
+        margin: 0;
+        padding: 0;
+    }
+
+  
+  .main-editing-modal ul {
+    z-index: 9999;
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 0 30px;
+    list-style-type: none;
+  }
+  
+  .main-editing-modal li:not(:last-child) {
+    z-index: 9999;
+    margin-right: 40px;
+  }
+  
+  .main-editing-modal li {
+    z-index: 9999;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    padding: 10px;
+    transition: background 0.2s;
+  }
+  
+  .main-editing-modal a, .main-editing-modal div {
+    z-index: 9999;
+    color: white;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  
+  .main-editing-modal ul  ul {
+    z-index: 9999;
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    display: block;
+    margin: 12px -12px;
+    padding: 0;
+    background: #0091ff;
+    border: 2px solid #F7C833;
+    border-right: 2px solid #0091ff;
+    border-bottom: 2px solid #0091ff;
+    border-radius: 5px;
+    transition: opacity 0.2s, visibility 0.2s;
+  }
+  
+  .main-editing-modal ul ul li {
+    z-index: 9999;
+    margin: -2px 0 0 -2px;
+    width: calc(100% - 20px);
+    line-height: 1.7;
+  }
+  
+  .main-editing-modal ul ul li a, .main-editing-modal ul ul li div {
+    z-index: 9999;
+    color: #2375D8;
+  }
+  
+  .main-editing-modal li:hover {
+    z-index: 9999;
+    background: #EC4138;
+    border: 2px solid #F05749;
+    border-right: 2px solid #E02A21;
+    border-bottom: 2px solid #E02A21;
+  }
+  
+  .main-editing-modal li:hover a, .main-editing-modal li:hover div {
+    z-index: 9999;
+    color: #F9F8FD;
+  }
+  
+  .main-editing-modal li:hover ul {
+    z-index: 9999;
+    visibility: visible;
+    opacity: 1;
+    box-shadow: 0px 3px 5px 2px #EBECF1;
+  }
+  
+  .main-editing-modal li:hover ul li a, .main-editing-modal li:hover ul li div {
+    z-index: 9999;
+    color: #F9F8FD;
+  }
+  
+  @keyframes slide-in {
+    0% {
+      top: -50px;
+    }
+    40% {
+      top: 20px;
+    }
+    70% {
+      top: 10px;
+    }
+    100% {
+      top: 15px;
+    }
+  }
+
+.main-modal-main-elements{
+
+}
+
+.main-editing-modal{
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+}
+
+  /* Below is the Upload Menu */
+.upload-container {
+    margin-left: -160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .upload-h1 {
+    margin-bottom: 50px;
+  }
+  
+  .Spacer_section{
+    border: solid;
+    width: 600px;
+    height: 500px;
+    align-items: top;
+    justify-content: top;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    padding: 5px;
+    max-height: calc(100% + 100px);  /* Adjust to fit your needs */
+    overflow-y: auto;  /* Scroll vertically when content overflows */
+  }
+
+  .upload-spacer-title{
+    margin-bottom: 10px;
+  }
+
+  .upload-menu-list li{
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+  
+  .directory-message{
+    margin-top: -5px;
+    font-size: 11px;
+  }
+  
+  .file-input {
+    /* Hide the default file input button */
+    display: none;
+    margin-top: 10px;
+  }
+  
+  .custom-file-input-button {
+    /* Add your custom styles here */
+    /* For example, change the background color, text color, and padding */
+    background-color: #e91e63;
+    color: white;
+    padding: 8px 16px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .custom-file-input-button:hover{
+    background-color: aqua;
+  }
+  
+  .upload-button {
+    background-color: #e91e63;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border-color: #e91e6200;
+    margin-top: 5px;
+    cursor: pointer;
+  }
+  
+  .upload-button:hover{
+    background-color: aqua;
+  }
+
+/* Below is the edit test pool related containers: Edit Test Pool Container */
+.main-edit-test-pool-container{
+    margin-left: 80px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    color: black;
+}
+
+.edit-current-test-pool-container{
+    margin-left: -160px;
+    width: 600px;
+    height: 500px;
+    align-items: top;
+    justify-content: top;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    padding: 35px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+}
+
+.edit-current-test-pool-header{
+    margin-bottom: 50px;
+    margin-top: -100px;
+}
+
+
+.current-list-container{
+    max-height: calc(100% + 100px);  /* Adjust to fit your needs */
+    overflow-y: auto;  /* Scroll vertically when content overflows */
+}
+
+.current-list-title{
+    margin-bottom: 10px;
+}
+
+.editTestPoolList{
+    color: #000;
+    padding: 5px;
+}
+
+.editTestPoolList li{
+    font-size: 20px;
+    color: #000;
+    padding: 4px;
+}
+
+.edit-bottom-title{
+    margin-bottom: -40px;
+    margin-top: 20px;
+}
+
+.randomize-state-true{
+    margin-top: 80px;
+    margin-bottom: -80px;
+}
+
+.randomize-state-false{
+    margin-top: 80px;
+    margin-bottom: -80px;
+}
+
+.bottom-buttons{
+    margin-top: 130px;
+    margin-bottom: -200px;
+}
+
+.edit-button{
+
+}
+
+.current-test-pool-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .edit-test-pool-content{
+    margin-left: -80px;
+  }
+  
+  .current-list-container{
+    border: solid;
+    width: 600px;
+    height: 500px;
+    align-items: top;
+    justify-content: top;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
+    border-radius: 5px;
+  }
+  
+  .edit-test-pool-container{
+    margin-left: 80px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    color: black;
+  }
+  
+  .bottom-buttons{
+    display: flex;
+    justify-content: center;
+    
+  }
+  
+  .edit-button{
+    font-size: 15px;
+    background-color: #e91e63;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border-color: #e91e6200;
+    margin-top: 5px;
+    cursor: pointer;
+  }
+  
+  .edit-button:hover{
+    background-color: aqua;
+  }
+  
+  .reload-button{
+    font-size: 15px;
+    margin-left: 5px;
+    background-color: #e91e63;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border-color: #e91e6200;
+    margin-top: 5px;
+    cursor: pointer;
+  }
+  
+  .reload-button:hover{
+    background-color: aqua;
+  }
+  
+  .randomize-button{
+    font-size: 15px;
+    margin-left: 5px;
+    background-color: #e91e63;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border-color: #e91e6200;
+    margin-top: 5px;
+    cursor: pointer;
+  }
+  
+  .randomize-button:hover{
+    background-color: aqua;
+  }
+  
+  .edit-test-pool-content{
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  }
+  
+  .edit-test-pool-form{
+    display: flex;
+    flex-direction: column;
+    width: 350px;
+    gap: 20px;
+  }
+  
+  .edit-test-pool-header{
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 50px;
+  }
+  
+  .amount-input-container{
+      color:black;
+  }
+  
+
+  .current-list-title{
+    color: #000;
+  }
+  
+  .form-label{
+    color: black;
+  }
+  
+  .form-select{
+    color:black;
+    margin-bottom: 10px;
+  }
+  
+  .dropdown-container{
+    color: black;
+  }
+  
+  .mb-3{
+    margin-top:100px;
+  }
+
+  .remove-button{
+    padding: 10px 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top:20px;
+  }
+
+  .remove-button:hover{
+    background-color: #024c9b;
+  }
+
+  .btn-primary{
+    margin-left: 5px;
+  }
+  
+  
+
+  // Below is the CSS for the Sidebar Navigational
+
 .sidebar-navigation {
     display: flex;
     flex-direction: column;
@@ -32,7 +516,12 @@ body {
     flex-direction: column;
 }
 
+.sidebar-navigation{
+    z-index: 15;
+}
+
 .sidebar-navigation ul {
+    z-index: 2;
     text-align: center;
     color: white;
 }
@@ -92,6 +581,10 @@ body {
     color: #98D7EC;
 }
 
+.sidebar-navigation ul li .tooltip, .logout-item .tooltip {
+    /* ... existing styles ... */
+    z-index: 3;  /* Ensure tooltips are above the sidebar, modal, and other elements */
+}
 /* Style for the logout button to make it consistent with other items */
 .logout-item {
     padding: 28px 0;
@@ -124,6 +617,7 @@ body {
         font-size: 13px;
         letter-spacing: .5px;
         white-space: nowrap; /* Prevent tooltip text from wrapping */
+        z-index: 100001;
     }
 
     &:hover .tooltip {

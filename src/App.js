@@ -64,6 +64,7 @@ function App() {
   }
     if (redirectTo === "/adminInstance") {
       console.log("Redirecting to /adminInstance from TypeSelectorModal");
+      console.log(localStorage.getItem('modalClosed'));
       return <Redirect to="/adminInstance" />;
     }
     console.log("Showing Modal, no redirection");
