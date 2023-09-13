@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, createContext } from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import TestInstance from './TestInstance.js';
+import TestPageContext from './TestPageContext';
+import AdminPage from './AdminWebpage.js';
 import App from './App.js';
 import './AdminInstance.scss';  // Importing the styles
+import TestPage from './TestWebpage.js';
 import MIPEACE_Logo from './MIPEACE_LOGO.png'
 import { useHistory } from 'react-router-dom';
 import { redirect } from 'react-router';
@@ -11,10 +14,12 @@ function AdminInstance() {
 
     const [activeItem, setActiveItem] = useState('Connections'); // Initial active item set to 'Connections'
     const [redirectToRootPage, setRedirectToRootPage] = useState(false);
-    
+    const [isExamEnabled, setIsExamEnabled] = useState(false);
+
     // Main Modal Const
     const [showMainModal, setShowMainModal] = useState(true);
-    const [showMainEditModal, setShowMainEditModal] = useState(false);
+    const [showMainAdminGridModal, setShowMainAdminGridModal] = useState(false);
+    const [showMainEditModal, setShowMainEditModal] = useState(true);
 
     // New Button Container
     const [showUploadContainer, setShowUploadContainer] = useState(false);
@@ -29,11 +34,95 @@ function AdminInstance() {
     const [tests, setTests] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
     const [isRandomizeEnabled, setIsRandomizeEnabled] = useState(false);
+    const isInteractingRef = useRef(false);
+
+    // Update Test Order Modal 
+    const [isTestOrderModalOpen, setIsTestOrderModalOpen] = useState(false);
+
+    // Examinee List Modal
+    const [showExamineeListModal, setExamineeListModal] =  useState(false);
+
+    useEffect(() => {
+      // Define the function to fetch the file list
+      const fetchFilesPeriodically = () => {
+        // If the user is interacting with the dropdown, skip the update
+        if (isInteractingRef.current) return;
+    
+        fetch('http://localhost:8080/api/get-file-names')
+            .then((response) => response.json())
+            .then((data) => {
+                // Directly update the state with fetched data
+                setTests(data);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    };    
+      
+      // Call the function immediately to fetch the file list
+      fetchFilesPeriodically();
+    
+      // Set up an interval to fetch the file list every 10 seconds (or any desired duration)
+      const intervalId = setInterval(fetchFilesPeriodically, 10000);
+    
+      // Clear the interval when the component is unmounted
+      return () => {
+          clearInterval(intervalId);
+      };
+  }, []);
+
+    const handleExamineeListNavigationClick = () => {
+      setActiveItem('ExamineeList');
+      setShowMainAdminGridModal(false); 
+      setShowMainEditModal(false);
+      setShowUploadContainer(false);
+      setShowEditContainer(false);
+      setIsTestOrderModalOpen(false);
+      setExamineeListModal(true);
+    }
+
+    const handleResultsNavigationClick = () => {
+      setActiveItem('Results'); 
+      setShowMainEditModal(false); 
+      setShowMainAdminGridModal(false);
+      setShowUploadContainer(false);
+      setShowEditContainer(false);
+      setIsTestOrderModalOpen(false);
+    }
+
+    const handleManageNavigationClick = () => {
+      setActiveItem('Manage'); 
+      setShowMainEditModal(true); 
+      setShowMainAdminGridModal(true); 
+      setShowEditContainer(false); 
+      setShowUploadContainer(false); 
+      setIsTestOrderModalOpen(false); 
+      fetchFileList();
+    }
+
+    const handlePullReportsNavigationClick = () => {
+      setActiveItem('PullReports'); 
+      setShowMainEditModal(false); 
+      setShowMainAdminGridModal(false);
+      setShowUploadContainer(false);
+      setShowEditContainer(false);
+      setIsTestOrderModalOpen(false);
+    }
+
+    const handleSettingsNavigationClick = () => {
+      setActiveItem('Settings'); 
+      setShowMainEditModal(false); 
+      setShowMainAdminGridModal(false);
+      setShowUploadContainer(false);
+      setShowEditContainer(false);
+      setIsTestOrderModalOpen(false);
+    }
     
     const handleLogoutClick = () => {
         console.log("Logout was clicked!");
         localStorage.setItem('adminLoggedOut', 'true'); // Set a specific flag for admin logout
         window.location.reload();
+
     };
 
     const handleUploadClick = (event) => {
@@ -41,6 +130,8 @@ function AdminInstance() {
         // Logic for handling "New" click
         setShowUploadContainer(true);
         setShowEditContainer(false);
+        setIsTestOrderModalOpen(false);
+        setShowMainAdminGridModal(false);
         fetch('http://localhost:8080/api/get-file-names')
         .then((response) => response.json())
         .then((data) => {
@@ -60,10 +151,20 @@ function AdminInstance() {
         event.preventDefault();
         // Logic for handling "Edit" click
         setShowEditContainer(true);
+        setIsTestOrderModalOpen(false);
         setShowUploadContainer(false);
+        setShowMainAdminGridModal(false);
         fetchFileList();
         
       }
+
+    const handleUpdateClick = (event) => {
+      event.preventDefault();
+      setIsTestOrderModalOpen(true);
+      setShowEditContainer(false);
+      setShowUploadContainer(false);
+      setShowMainAdminGridModal(false);
+    }
 
     const handleEditButtonClick = () => {
         setShowEditTestPoolContainer(true);
@@ -206,22 +307,33 @@ function AdminInstance() {
             fetchFileList();
         }
         }, [showEditContainer]);
+        
+    useEffect(() => {
+      if (isExamEnabled) {
+          localStorage.setItem('testStarted', 'true');
+      } else {
+          localStorage.setItem('testStarted', 'false');
+      }
+  }, [isExamEnabled]);
 
-    const fetchFileList = () => {
-        fetch('http://localhost:8080/api/get-file-names')
-            .then((response) => response.json())
-            .then((data) => {
-            setTests(data);
-            console.log(tests);
-            setFileNames(data);
-            console.log(fileNames);
-            })
-            .catch((error) => {
-            console.error(error);
-            // Handle any errors that occurred during the request
-            });
-        };
+  const fetchFileList = () => {
+    fetch('http://localhost:8080/api/get-file-names')
+        .then((response) => response.json())
+        .then((data) => {
+        setTests(data);
+        console.log(tests);
+        setFileNames(data);
+        console.log(fileNames);
+        })
+        .catch((error) => {
+        console.error(error);
+        // Handle any errors that occurred during the request
+        });
+    };
 
+    useEffect(() => {
+      isInteractingRef.current = showEditTestPoolContainer;
+  }, [showEditTestPoolContainer]);
 
     const AdminControlPanel = () => {
         // Check specifically for admin logout
@@ -306,87 +418,104 @@ function AdminInstance() {
               return (
                 <div className="edit-test-pool-container" onClick={() => setShowEditTestPoolContainer(false)}>
                   <div className="edit-test-pool-content" onClick={(e) => e.stopPropagation()}>
-                    <div className="edit-test-pool-form">
-                      <form onSubmit={handleRemoveButtonClick}>
+                  <div className="edit-test-pool-form">
+                    <form onSubmit={handleRemoveButtonClick}>
                         <h1 className="edit-test-pool-header">Edit the Test Pool</h1>
                         <div className="amount-input-container">
-                          <label htmlFor="test-dropdown" className="amount-input">
-                            Items to remove:
-                          </label>
-                          {selectedTests.map((selectedTest, index) => (
-                            <select
-                              key={`select_${index}`}
-                              className="form-select"
-                              onChange={(event) => handleTestSelection(event, index)}
-                              value={selectedTest}
-                            >
-                              <option value="">
-                                -- Select a test --
-                              </option>
-                              {tests.length > 0 &&
-                                tests.map((test) => (
-                                  <option key={test.id} value={test.id}>
-                                    {test.name}
-                                  </option>
-                                ))}
-                            </select>
-                          ))}
+                            <label htmlFor="test-dropdown" className="amount-input">
+                                Items to remove:
+                            </label>
+                            {selectedTests.map((selectedTest, index) => (
+                                <select
+                                    key={`select_${index}`}
+                                    className="form-select"
+                                    onChange={(event) => handleTestSelection(event, index)}
+                                    value={selectedTest}
+                                >
+                                    <option value="">
+                                        -- Select a test --
+                                    </option>
+                                    {tests.length > 0 &&
+                                        tests.filter(test => test.name && test.name.toLowerCase() !== 'desktop.ini').map((test) => (
+                                            <option key={test.id} value={test.id}>
+                                                {test.name}
+                                            </option>
+                                        ))}
+                                </select>
+                            ))}
                         </div>
-                        <div className="mb-3">
-                          <label htmlFor="num-of-tests" className="form-label">
-                            Number of Tests in Sequence:
-                          </label>
-                          <input
-                            type="number"
-                            id="num-of-tests"
-                            name="num-of-tests"
-                            className="form-control"
-                            value={numOfTests}
-                            onChange={handleUpdateNumOfTests}
-                          />
-                          <button
-                            type="button"
-                            className="btn btn-primary"
-                            onClick={handleUpdateTests}
+                          <div className="mb-3">
+                              <label htmlFor="num-of-tests" className="form-label">
+                                  Number of Tests in Sequence:
+                              </label>
+                              <input
+                                  type="number"
+                                  id="num-of-tests"
+                                  name="num-of-tests"
+                                  className="form-control"
+                                  value={numOfTests}
+                                  onChange={handleUpdateNumOfTests}
+                                  onFocus={() => isInteractingRef.current = true}
+                                  onBlur={() => isInteractingRef.current = false}
+                              />
+                              <button
+                                  type="button"
+                                  className="btn btn-primary"
+                                  onClick={handleUpdateTests}
+                              >
+                                  Update
+                              </button>
+                          </div>
+                          <button className="remove-button" 
+                              onClick={(event) => handleRemoveButtonClick(event)} // Pass the event object here
                           >
-                            Update
+                              Remove
                           </button>
-                        </div>
-                        <button className="remove-button" 
-                         onClick={(event) => handleRemoveButtonClick(event)} // Pass the event object here
-                         >
-                          Remove
-                        </button>
                       </form>
-                    </div>
+                  </div>
                   </div>
                 </div>
               );
             }
             return null;
           };
-        return (
+
+          const renderPullExamineeList = () => {
+            
+          if(showExamineeListModal){
+            return(
+              <div className="examinee-panel-wrapper">
+                <div className="examinee-main-container">
+                  <div className="examinee-inner-container">
+
+                  </div>
+                </div>
+              </div>
+            );
+          }}
+
+          return (
             <div className="admin-control-panel-wrapper">
                 <nav className="sidebar-navigation">
-                    <div className="menu-items">
+                <div className="menu-items">
                         <ul>
-                            <li className={activeItem === 'ExamineeList' ? 'active' : ''} onClick={() => {setActiveItem('ExamineeList'); setShowMainEditModal(false);}}>
+                            <li className={activeItem === 'ExamineeList' ? 'active' : ''} onClick={() => {handleExamineeListNavigationClick();}}>
                                 <i className="fa fa-share-alt"></i>
                                 <span className="tooltip">Examinee List</span>
                             </li>
-                            <li className={activeItem === 'Results' ? 'active' : ''} onClick={() => {setActiveItem('Results'); setShowMainEditModal(false);}}>
+                            <li className={activeItem === 'Results' ? 'active' : ''} onClick={() => {handleResultsNavigationClick();}}>
                                 <i className="fa fa-hdd-o"></i>
                                 <span className="tooltip">Results</span>
                             </li>
-                            <li className={activeItem === 'Manage' ? 'active' : ''} onClick={() => {setActiveItem('Manage'); setShowMainEditModal(true); setShowEditContainer(false); setShowUploadContainer(false); }}>
+                            <li className={activeItem === 'Manage' ? 'active' : ''} onClick={() => {handleManageNavigationClick();}}>
                                 <i className="fa fa-newspaper-o"></i>
                                 <span className="tooltip">Manage Exams</span>
                             </li>
-                            <li className={activeItem === 'PullReports' ? 'active' : ''} onClick={() => {setActiveItem('PullReports'); setShowMainEditModal(false);}}>
+                            <li className={activeItem === 'PullReports' ? 'active' : ''} onClick={() => {handlePullReportsNavigationClick();}}>
                                 <i className="fa fa-print"></i>
                                 <span className="tooltip">Pull Reports</span>
                             </li>
-                            <li className={activeItem === 'Settings' ? 'active' : ''} onClick={() => {setActiveItem('Settings'); setShowMainEditModal(false);}}>
+                            <li className={activeItem === 'Settings' ? 'active' : ''} onClick={() => {handleSettingsNavigationClick();}}>
                                 <i className="fa fa-sliders"></i>
                                 <span className="tooltip">Settings</span>
                             </li>
@@ -398,36 +527,77 @@ function AdminInstance() {
                 </li>
                 </nav>
                 <div className="modal-area">
-                   {showMainModal &&( 
-                       <div className="top-admin-ribbon">   
-                       {showMainEditModal &&(  
-                        <div className="main-editing-modal">
-                            <nav> 
-                                <ul>  
-                                    <li><a href="0" onClick={handleUploadClick}>Upload</a></li>
-                                    <li><a href="0" onClick={handleEditClick}>Edit</a></li>
-                                    <li><a href="0" onClick={handleEditClick}>Update</a></li>
-                                </ul> 
-                            </nav> 
+                    {showMainModal && (
+                        <div className="top-admin-ribbon">
+                            {showExamineeListModal &&(
+                              <div className="examinee-panel-title">
+                                Examinee List Portal
+                              </div>
+                            )}
+                            <div className="top-admin-ribbon-title">
+                                Admin Interface
+                            </div>
+                            {showMainEditModal && (
+                                <div className="main-editing-modal">
+                                    <nav> 
+                                        <ul>  
+                                            <li><a href="0" onClick={handleUploadClick}>Upload</a></li>
+                                            <li><a href="0" onClick={handleEditClick}>Edit</a></li>
+                                            <li><a href="0" onClick={handleUpdateClick}>Update</a></li>
+                                        </ul> 
+                                    </nav> 
+                                </div>
+                            )}
                         </div>
-                       )}
-                        <div className= "main-modal-main-elements">
-
+                    )}
+                    {isTestOrderModalOpen && 
+                      <AdminPage
+                        closeTestOrderModal={() => setIsTestOrderModalOpen(false)}
+                      />
+                    }
+                    {showMainModal && showMainAdminGridModal &&(
+                        <div className="main-modal-main-elements">
+                            <div className="admin-grid">
+                                <div className="files-list">
+                                    <h3>Files in Directory:</h3>
+                                    <ul>
+                                      {fileNames
+                                        .filter((fileName) => fileName.toLowerCase() !== 'desktop.ini')
+                                        .map((filteredFileName, index) => (
+                                          <li key={index}>{filteredFileName}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                <div className="test-submissions">
+                                    <h3>Test Submissions:</h3>
+                                    <p>
+                                        {localStorage.getItem('examStarted') === 'true' ? localStorage.getItem('amountOfExaminees') : 'Exam Not Started'}
+                                    </p>
+                                </div>
+                                <div className="start-exam" onClick={() => setIsExamEnabled(!isExamEnabled)}>
+                                    <h3>Start Exam</h3>
+                                    <p>Press here to begin the Exam for examinees.</p>
+                                    <p2>{isExamEnabled ? 'Enabled' : 'Disabled'}</p2>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                   )}
+                    )}
                     {renderUploadContainer()} 
                     {renderEditContainer()}
                     {renderEditTestPoolContainer()}
+                    {renderPullExamineeList()}
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="AdminInstance">
-            {AdminControlPanel()}
-        </div>
+      <div className="AdminInstance">
+        {AdminControlPanel()}
+          <TestPageContext.Provider value={{ isRandomizeEnabled, setIsRandomizeEnabled }}>
+              {/* You can have other components here that use the context */}
+          </TestPageContext.Provider>
+      </div>
     );
 }
     

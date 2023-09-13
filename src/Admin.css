@@ -2,21 +2,44 @@
     color: black;
   }
   
-.container {
-    z-index: 1;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative; /* Add position relative for the X button positioning */
+.test-list-choice-container {
+    margin-top: 60px;
+    height:250px;
+    max-height: 250px; /* Adjust this value to your preferred height */
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.test-list-container-inner{
+    border-radius: 5px;
+    border: solid black;
+    padding: 50px;
+    height: 550px; /* Fixed height so it doesn't expand or shrink */
+    /* remove overflow and white-space properties here */
+}
+
+/* Customize the scrollbar for .test-list-choice-container */
+.test-list-choice-container::-webkit-scrollbar {
+    width: 8px; /* Adjust this value to your preferred width */
+    background-color: #f0f0f0; /* Set your preferred background color */
+}
+
+.test-list-choice-container::-webkit-scrollbar-thumb {
+    background-color: #888; /* Set your preferred thumb color */
+    border-radius: 4px; /* Adjust the radius as needed */
+}
+
+.test-list-choice-container::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Set the hover color */
 }
 
 .TestOrderLabel {
     font-size: 24px;
     color: black;
-    margin-bottom: 0px;
+    margin-bottom: 50px;
+}
+
+.test-list-manager{
 }
 
 h2 {
@@ -29,19 +52,50 @@ form {
     margin-top: 20px;
 }
 
+/* Style the Select2 container */
+.select2-container {
+    width: 100%;
+  }
+  
+  /* Style the dropdown arrow */
+  .select2-container .select2-selection__arrow {
+    background-color: transparent;
+    border-left: none;
+  }
+  
+
 .form-label {
     color: black;
     padding: 10px;
-    margin-bottom: 50px;
     font-weight: 600;
+    margin-top: 10px;
 }
 
+/* Reset padding, margin, and appearance for the select element */
 .form-select {
-    padding: 8px 12px;
+    display: block;
+    padding: 12px 8px;
+    margin: 0;
     border-radius: 4px;
     border: 1px solid #ced4da;
     width: 100%;
+    appearance: none; /* Remove browser-specific styling */
+    -webkit-appearance: none; /* For Safari */
 }
+
+/* Style the select element to give it a custom appearance if needed */
+.form-select::-ms-expand {
+    display: none; /* Remove arrow in IE */
+}
+
+/* Optionally, add a custom background and padding for the select element */
+.form-select {
+    background-color: white;
+    padding-right: 24px; /* Adjust as needed to make room for the arrow */
+    background-repeat: no-repeat;
+    background-position: right center;
+}
+
 
 .btn {
     display: inline-block;
@@ -58,7 +112,7 @@ form {
 .btn-primary {
     padding: 10px;
     background-color: #007bff;
-    margin-top: 10px;
+
 }
 
 .btn-primary:hover {
@@ -148,3 +202,28 @@ form {
     height: auto;
     padding: 10px;
 }
+
+/*View Order Menu CSS*/
+
+.view-order-container{
+    margin-top: -100px;
+    margin-left: -130px;
+}
+
+.view-order-title{
+    margin-bottom: 50px;
+}
+
+.view-order-inner-container{
+    border-radius: 5px;
+    border: solid black;
+    padding: 50px;
+    height: 350px; /* Fixed height so it doesn't expand or shrink */
+    margin-bottom: -70px;
+}
+
+.view-order-list-title{
+    margin-bottom: 15px;
+    margin-top: -25px;
+}
+

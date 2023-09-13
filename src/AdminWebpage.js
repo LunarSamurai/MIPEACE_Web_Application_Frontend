@@ -3,7 +3,7 @@ import './Admin.css'; // Import the CSS file
 import { useHistory } from 'react-router-dom';
 import badPersonImage from "./bad_person.png";
 
-function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage, setIsAdmin }) {
+function AdminPage() {
   const history = useHistory();
   const [tests, setTests] = useState([]);
   const [selectedTests, setSelectedTests] = useState([]);
@@ -14,12 +14,6 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage, s
   const [showUnauthorized, setShowUnauthorized] = useState(false);
 
   useEffect(() => {
-    const isAdmin = localStorage.getItem('isAdmin') === 'true';
-    if (!isAdmin) {
-      setIsAdmin(false);
-      return;
-    }
-
     fetch('http://localhost:8080/test/questions')
       .then((response) => response.json())
       .then((data) => {
@@ -30,14 +24,7 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage, s
         setTests(testsFromServer);
       })
       .catch((error) => console.error('Error:', error));
-  }, [history, setIsAdmin]);
-
-  useEffect(() => {
-    if (hasBeenToAdminWebpage && !isAdmin) {
-      setHasBeenToAdminWebpage(false);
-      history.push('/');
-    }
-  }, [hasBeenToAdminWebpage, isAdmin, history, setHasBeenToAdminWebpage]);
+  }, [history,]);
 
   useEffect(() => {
     const updatedSelectedTests = selectedTests.slice(0, numOfTests);
@@ -125,11 +112,9 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage, s
   };
 
   const handleReturnToHub = () => {
-    setHasBeenToAdminWebpage(false);
     history.push('/');
     window.location.reload();
     localStorage.setItem('isAdmin', 'false');
-    setIsAdmin(false);
   };
 
   useEffect(() => {
@@ -139,7 +124,7 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage, s
 
     return () => clearTimeout(timer);
   }, []);
-
+  /*
   if (!isAdmin) {
     if (!showUnauthorized) {
       return null;
@@ -158,87 +143,94 @@ function AdminPage({ isAdmin, hasBeenToAdminWebpage, setHasBeenToAdminWebpage, s
       </div>
     );
   }
+  */
 
   if (viewOrderMenu) {
     return (
-      <div className="container">
-        <h1 className="mb-4">View Order Menu</h1>
-        <h3>Current List Order:</h3>
+      <div className="view-order-container">
+        <h1 className="view-order-title">View Order Menu</h1>
+        <div className="view-order-inner-container">
+        <h3 className="view-order-list-title">Current List Order:</h3>
         <ul>
           {selectedTests.map((test, index) => (
             <li key={index}>{test}</li>
           ))}
         </ul>
+        </div>
         <button className="btn btn-primary mb-3" onClick={handleEditOrder}>
           Edit
-        </button>
-        <button className="btn btn-danger" onClick={handleReturnToHub}>
-          &times;
         </button>
       </div>
     );
   }
 
   return (
-    <div className="container">
-      <h1 className="mb-4">Admin Page</h1>
-      <h2 className="mb-5">Update Test Order</h2>
-      <form onSubmit={handleSaveOrder}>
-        <div className="mb-3">
+    <div className="test-list-container">
+      <h1 className="mb-4">Update Test List</h1>
+      <h2 className="mb-5">Update the list of available tests in test pool.</h2>
+      <div className="test-list-container-inner">
+          <h1 className="test-list-title">Current List:</h1>
           <label htmlFor="test-dropdown" className="form-label">
             Select Test:
           </label>
-          {selectedTests.map((selectedTest, index) => (
-            <select
-              key={index}
-              className="form-select"
-              onChange={(event) => handleTestSelection(event, index)}
-              value={selectedTest}
-            >
-              <option value="">-- Select a test --</option>
-              {tests.length > 0 &&
-                tests.map((test) => (
-                  <option key={test.id} value={test.id}>
-                    {test.name}
-                  </option>
+          <div className="test-list-choice-container">
+            <form onSubmit={handleSaveOrder}>
+              <div className="mb-3">
+                {selectedTests.map((selectedTest, index) => (
+                  <select
+                    key={index}
+                    className="form-select" // Apply the form-select class here
+                    onChange={(event) => handleTestSelection(event, index)}
+                    value={selectedTest}
+                  >
+                    <option value="">-- Select a test --</option>
+                    {tests.length > 0 &&
+                      tests.filter(test => test.name && test.name.toLowerCase() !== 'desktop.ini').map((test) => (
+                        <option key={test.id} value={test.id}>
+                          {test.name}
+                        </option>
+                      ))}
+                  </select>
                 ))}
-            </select>
-          ))}
+              </div>
+            </form>
+          </div>
+        <div className="test-list-manager">
+        <form onSubmit={handleSaveOrder}>
+          <div className="mb-3">
+            <label htmlFor="num-of-tests" className="form-label">
+              Number of Tests in Test Pool:
+            </label>
+            <input
+              type="number"
+              id="num-of-tests"
+              name="num-of-tests"
+              className="form-control"
+              value={numOfTests}
+              onChange={handleUpdateNumOfTests}
+            />
+            <button type="button" className="btn btn-primary" onClick={handleUpdateTests}>
+              Update
+            </button>
+          </div>
+          <div className="btn-group">
+            <button className="btn btn-primary" type="submit">
+              Save List
+            </button>
+            <button className="btn btn-primary" onClick={handleViewOrder}>
+              View List
+            </button>
+          </div>
+        </form>
         </div>
-        <div className="mb-3">
-          <label htmlFor="num-of-tests" className="form-label">
-            Number of Tests in Sequence:
-          </label>
-          <input
-            type="number"
-            id="num-of-tests"
-            name="num-of-tests"
-            className="form-control"
-            value={numOfTests}
-            onChange={handleUpdateNumOfTests}
-          />
-          <button type="button" className="btn btn-primary" onClick={handleUpdateTests}>
-            Update
-          </button>
-        </div>
-        <div className="btn-group">
-          <button className="btn btn-primary" type="submit">
-            Save Order
-          </button>
-          <button className="btn btn-primary" onClick={handleViewOrder}>
-            View Order
-          </button>
-        </div>
-      </form>
-      <button className="btn btn-danger" onClick={handleReturnToHub}>
-        &times;
-      </button>
-      {!viewOrderMenu && saveConfirmation && (
-        <div className="save-confirmation">Successfully Saved!</div>
-      )}
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
+        {!viewOrderMenu && saveConfirmation && (
+          <div className="save-confirmation">Successfully Saved!</div>
+        )}
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
+      </div>
     </div>
   );
+  
 }
 
 export default AdminPage;

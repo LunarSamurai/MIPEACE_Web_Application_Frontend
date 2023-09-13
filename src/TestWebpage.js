@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import './Test.css'; // Import the CSS file
 import { useHistory } from 'react-router-dom';
 import warningSound from "./wrong-answer-126515.mp3";
+import TestPageContext from './TestPageContext';
 
-function TestPage(isRandomizeEnabled, setIsRandomizeEnabled) {
+function TestPage() {
   const [sortedTestOrders, setSortedTestOrders] = useState([]);
   const [currentTestIndex, setCurrentTestIndex] = useState(0);
   const [currentTestLines, setCurrentTestLines] = useState([]);
@@ -14,6 +15,7 @@ function TestPage(isRandomizeEnabled, setIsRandomizeEnabled) {
   const [showContinueMessage, setShowContinueMessage] = useState(false);
   const [assessmentComplete, setAssessmentComplete] = useState(false); // New state variable
   const history = useHistory();
+  const { isRandomizeEnabled, setIsRandomizeEnabled } = useContext(TestPageContext);
 
   const responseIDMap = {
     'Strongly Disagree': 5,

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import logo from './brain-illustration-12-svgrepo-com.svg';
 import signInImage from './logo-big.png';
 import './TestInstance.css';
+import TestPage from './TestWebpage.js';
 import { BrowserRouter as Router, Switch, Route, Link, Redirect } from 'react-router-dom';
 import TestWebpage from './TestWebpage.js';
 import AdminWebpage from './AdminWebpage.js';
@@ -24,6 +25,7 @@ function TestInstance() {
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
   const [showLogo, setShowLogo] = useState(true);
   const [error, setError] = useState('');
+  const [isRandomizeEnabled, setIsRandomizeEnabled] = useState(false);
 
   //Admin Login
   const [isAdmin, setIsAdmin] = useState(false);
@@ -167,6 +169,12 @@ const [userDetails, setUserDetails] = useState({
       setError('Invalid first name. Please enter the first name that appears on your CAC Card.');
       // Display an error message or perform appropriate error handling
       return;
+    }
+
+    if (localStorage.getItem('testStarted') === 'true') {
+      let currentCount = parseInt(localStorage.getItem('amountOfExaminees') || '0');
+      currentCount += 1;
+      localStorage.setItem('amountOfExaminees', currentCount.toString());
     }
 
     // Save the values in localStorage
