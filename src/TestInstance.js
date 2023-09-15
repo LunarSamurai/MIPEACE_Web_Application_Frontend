@@ -25,7 +25,6 @@ function TestInstance() {
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
   const [showLogo, setShowLogo] = useState(true);
   const [error, setError] = useState('');
-  const [isRandomizeEnabled, setIsRandomizeEnabled] = useState(false);
 
   //Admin Login
   const [isAdmin, setIsAdmin] = useState(false);
@@ -847,55 +846,6 @@ const [userDetails, setUserDetails] = useState({
       </div>
     );
   };
-
-  const renderAdminLogin = () => (
-    <div className="admin-login-overlay" onClick={() => setShowAdminLogin(false)}>
-      <div className="admin-login-container" onClick={(e) => e.stopPropagation()}>
-        <div className="admin-login-content">
-          <form className="admin-login-form" onSubmit={handleAdminLoginSubmit}>
-            <img src={signInImage} alt="Sign In" className="admin-image" />
-            <p className="Admin-Req"> Are you an admin?</p>
-            {adminLoginError && (
-              <p className="admin-login-error-message">
-                Incorrect Admin Credentials. Please try again. Attempts left: {adminAttemptsLeft}
-              </p>
-            )}
-            <input
-              type="text"
-              placeholder="CAC ID"
-              value={adminCacid}
-              onChange={(e) => setAdminCacid(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="First Name"
-              value={adminFirstName}
-              onChange={(e) => setAdminFirstName(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Middle Name"
-              value={adminMiddleName}
-              onChange={(e) => setAdminMiddleName(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              value={adminLastName}
-              onChange={(e) => setAdminLastName(e.target.value)}
-              required
-            />
-            <button className="admin-login-button" type="submit" disabled={adminButtonDisabled}>
-              Login
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="testInstance">
