@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-d
 import TestInstance from './TestInstance.js';
 import TestPageContext from './TestPageContext';
 import AdminPage from './AdminWebpage.js';
+import signInImage from './logo-big.png';
 import App from './App.js';
 import './AdminInstance.scss';  // Importing the styles
 import TestPage from './TestWebpage.js';
@@ -11,10 +12,27 @@ import { useHistory } from 'react-router-dom';
 import { redirect } from 'react-router';
 
 function AdminInstance() {
-
     const [activeItem, setActiveItem] = useState('Connections'); // Initial active item set to 'Connections'
     const [redirectToRootPage, setRedirectToRootPage] = useState(false);
     const [isExamEnabled, setIsExamEnabled] = useState(false);
+    
+    // Admin Login
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [showAdminLogin, setShowAdminLogin] = useState(true);
+    const [adminCacid, setAdminCacid] = useState('');
+    const [adminFirstName, setAdminFirstName] = useState('');
+    const [adminMiddleName, setAdminMiddleName] = useState('');
+    const [adminLastName, setAdminLastName] = useState('');
+    const [adminLoginAttempts, setAdminLoginAttempts] = useState(0);
+    const [adminButtonDisabled, setAdminButtonDisabled] = useState(false);
+    const [redirectToAdmin, setRedirectToAdmin] = useState(false);
+    const [adminLoginError, setAdminLoginError] = useState(false);
+    const MAX_LOGIN_ATTEMPTS = 5;
+    const [adminAttemptsLeft, setAdminAttemptsLeft] = useState(MAX_LOGIN_ATTEMPTS);
+    const LOCKOUT_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+    const [showAdminLockoutMessage, setShowAdminLockoutMessage] = useState(false);
+    const [hasBeenToAdminWebpage, setHasBeenToAdminWebpage] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Main Modal Const
     const [showMainModal, setShowMainModal] = useState(true);
@@ -57,7 +75,7 @@ function AdminInstance() {
             .catch((error) => {
                 console.error(error);
             });
-    };    
+      };    
       
       // Call the function immediately to fetch the file list
       fetchFilesPeriodically();
@@ -68,8 +86,8 @@ function AdminInstance() {
       // Clear the interval when the component is unmounted
       return () => {
           clearInterval(intervalId);
-      };
-  }, []);
+        };
+      }, []);
 
     const handleExamineeListNavigationClick = () => {
       setActiveItem('ExamineeList');
@@ -88,6 +106,7 @@ function AdminInstance() {
       setShowUploadContainer(false);
       setShowEditContainer(false);
       setIsTestOrderModalOpen(false);
+      setExamineeListModal(false);
     }
 
     const handleManageNavigationClick = () => {
@@ -97,6 +116,7 @@ function AdminInstance() {
       setShowEditContainer(false); 
       setShowUploadContainer(false); 
       setIsTestOrderModalOpen(false); 
+      setExamineeListModal(false);
       fetchFileList();
     }
 
@@ -107,6 +127,7 @@ function AdminInstance() {
       setShowUploadContainer(false);
       setShowEditContainer(false);
       setIsTestOrderModalOpen(false);
+      setExamineeListModal(false);
     }
 
     const handleSettingsNavigationClick = () => {
@@ -116,13 +137,16 @@ function AdminInstance() {
       setShowUploadContainer(false);
       setShowEditContainer(false);
       setIsTestOrderModalOpen(false);
+      setExamineeListModal(false);
     }
     
     const handleLogoutClick = () => {
         console.log("Logout was clicked!");
         localStorage.setItem('adminLoggedOut', 'true'); // Set a specific flag for admin logout
+        setShowAdminLogin(false); // Set showAdminLogin to false here
+        console.log(showAdminLogin)
+        setIsAdmin(false);
         window.location.reload();
-
     };
 
     const handleUploadClick = (event) => {
@@ -253,7 +277,7 @@ function AdminInstance() {
             // Handle case when no file is selected
             console.log('No file selected.');
         }
-        };
+      };
 
     const handleRemoveButtonClick = (event) => {
         event.preventDefault();
@@ -314,7 +338,7 @@ function AdminInstance() {
       } else {
           localStorage.setItem('testStarted', 'false');
       }
-  }, [isExamEnabled]);
+    }, [isExamEnabled]);
 
   const fetchFileList = () => {
     fetch('http://localhost:8080/api/get-file-names')
@@ -333,13 +357,124 @@ function AdminInstance() {
 
     useEffect(() => {
       isInteractingRef.current = showEditTestPoolContainer;
-  }, [showEditTestPoolContainer]);
+    }, [showEditTestPoolContainer]);
+
+    const handleAdminLoginSubmit = (event) => {
+      event.preventDefault();
+  
+      // Create an object with the form data
+  
+      // Make an HTTP GET request to your backend API for retrieving admin data
+      fetch(`http://localhost:8080/api/admin-login?cacid=${adminCacid}`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('Response from backend:', data); // Print the response from the backend
+          if (data === 'Invalid admin credentials') {
+            console.log('Invalid admin credentials');
+            setAdminLoginError(true);
+          } else {
+            const { firstName, middleName, lastName } = data;
+            // Check if entered admin credentials match the retrieved admin data
+            if (
+              adminCacid === '0000000001' &&
+              firstName === adminFirstName &&
+              middleName === adminMiddleName &&
+              lastName === adminLastName
+            ) {
+              localStorage.setItem('isAdmin', 'true');
+              console.log('Admin login successful');
+              console.log('CAC ID: ', adminCacid);
+              console.log('First Name:', firstName);
+              console.log('Middle Name:', middleName);
+              console.log('Last Name:', lastName);
+              // Save admin status in local storage or state
+              // Here, we're using state to track the logged-in status
+              setAdminLoginError(false);
+              setIsAdmin(true);
+              setShowAdminLogin(false);
+            } else {
+              setAdminLoginAttempts((prevAttempts) => prevAttempts + 1);
+              setAdminAttemptsLeft((prevAttemptsLeft) => prevAttemptsLeft - 1);
+              setShowAdminLogin(true);
+              setIsAdmin(false);
+              setAdminLoginError(true);
+            }
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          // Handle any errors that occurred during the request
+          // Display an error message or perform appropriate error handling
+        });
+    };
+    const renderAdminLogin = () => {
+      console.log("Inside renderAdminLogin function");
+      console.log("isAdmin (inside renderAdminLogin):", isAdmin);
+      console.log("showAdminLogin (inside renderAdminLogin):", showAdminLogin);
+      // Check specifically for admin logout
+      if (localStorage.getItem('adminLoggedOut') === "true") {
+        return <Redirect to="/" />
+      }
+
+      if (!isAdmin && showAdminLogin) {
+      return (
+        <div className="admin-login-overlay" onClick={() => setShowAdminLogin(false)}>
+          <div className="admin-login-container" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-login-content">
+              <form className="admin-login-form" onSubmit={handleAdminLoginSubmit}>
+                <img src={signInImage} alt="Sign In" className="admin-image" />
+                <p className="Admin-Req"> Are you an admin?</p>
+                {adminLoginError && (
+                  <p className="admin-login-error-message">
+                    Incorrect Admin Credentials. Please try again. Attempts left: {adminAttemptsLeft}
+                  </p>
+                )}
+                <input
+                  type="text"
+                  placeholder="CAC ID"
+                  value={adminCacid}
+                  onChange={(e) => setAdminCacid(e.target.value)}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  value={adminFirstName}
+                  onChange={(e) => setAdminFirstName(e.target.value)}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Middle Name"
+                  value={adminMiddleName}
+                  onChange={(e) => setAdminMiddleName(e.target.value)}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  value={adminLastName}
+                  onChange={(e) => setAdminLastName(e.target.value)}
+                  required
+                />
+                <button className="admin-login-form-button" type="submit">
+                  Login
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      );
+    } return null;
+  }
+
 
     const AdminControlPanel = () => {
         // Check specifically for admin logout
         if (localStorage.getItem('adminLoggedOut') === "true") {
             return <Redirect to="/" />
         }
+        
         const renderUploadContainer = () => {
             if (showUploadContainer) {
               return (
@@ -372,6 +507,7 @@ function AdminInstance() {
             }
             return null;
           };
+
           const renderEditContainer = () => {
             if (showEditContainer) {
               return (
@@ -413,7 +549,6 @@ function AdminInstance() {
           };
         
           const renderEditTestPoolContainer = () => {
-      
             if (showEditTestPoolContainer) {
               return (
                 <div className="edit-test-pool-container" onClick={() => setShowEditTestPoolContainer(false)}>
@@ -481,7 +616,6 @@ function AdminInstance() {
           };
 
           const renderPullExamineeList = () => {
-            
           if(showExamineeListModal){
             return(
               <div className="examinee-panel-wrapper">
@@ -593,12 +727,23 @@ function AdminInstance() {
 
     return (
       <div className="AdminInstance">
-        {AdminControlPanel()}
-          <TestPageContext.Provider value={{ isRandomizeEnabled, setIsRandomizeEnabled }}>
-              {/* You can have other components here that use the context */}
-          </TestPageContext.Provider>
+        {isAdmin ? (
+          !showAdminLogin ? (
+            <AdminControlPanel />
+          ) : null
+        ) : (
+          showAdminLogin ? (
+            <div className="admin-login-wrapper" style={{ background: 'white' }}>
+              {renderAdminLogin()}
+            </div>
+          ) : null
+        )}
+        <TestPageContext.Provider value={{ isRandomizeEnabled, setIsRandomizeEnabled }}>
+          {/* You can have other components here that use the context */}
+        </TestPageContext.Provider>
       </div>
     );
+
 }
     
 export default AdminInstance;

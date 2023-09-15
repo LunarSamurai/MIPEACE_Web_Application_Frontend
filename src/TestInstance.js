@@ -857,7 +857,6 @@ const [userDetails, setUserDetails] = useState({
         )}
         {showSignup && !submitted && renderSignupForm()}
         {submitted && renderHubArea()}
-        {showAdminLogin && renderAdminLogin()}
     </div>
 );
 
