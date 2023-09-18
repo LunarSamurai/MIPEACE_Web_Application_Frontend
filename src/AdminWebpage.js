@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import './Admin.css'; // Import the CSS file
 import { useHistory } from 'react-router-dom';
 import badPersonImage from "./bad_person.png";
+import '@progress/kendo-theme-default/dist/all.css';
+import { DropDownList } from '@progress/kendo-react-dropdowns';
+
 
 function AdminPage() {
   const history = useHistory();
@@ -196,32 +199,32 @@ function AdminPage() {
             </form>
           </div>
         <div className="test-list-manager">
-        <form onSubmit={handleSaveOrder}>
-          <div className="mb-3">
-            <label htmlFor="num-of-tests" className="form-label">
-              Number of Tests in Test Pool:
-            </label>
-            <input
-              type="number"
-              id="num-of-tests"
-              name="num-of-tests"
-              className="form-control"
-              value={numOfTests}
-              onChange={handleUpdateNumOfTests}
-            />
-            <button type="button" className="btn btn-primary" onClick={handleUpdateTests}>
-              Update
-            </button>
-          </div>
-          <div className="btn-group">
-            <button className="btn btn-primary" type="submit">
-              Save List
-            </button>
-            <button className="btn btn-primary" onClick={handleViewOrder}>
-              View List
-            </button>
-          </div>
-        </form>
+          <form onSubmit={handleSaveOrder}>
+            <div className="mb-3">
+              <label htmlFor="num-of-tests" className="form-label">
+                Number of Tests in Test Pool:
+              </label>
+              <input
+                type="number"
+                id="num-of-tests"
+                name="num-of-tests"
+                className="form-control"
+                value={numOfTests}
+                onChange={handleUpdateNumOfTests}
+              />
+              <button type="button" className="btn btn-primary" onClick={handleUpdateTests}>
+                Update
+              </button>
+            </div>
+            <div className="btn-group">
+              <button className="btn btn-primary" type="submit">
+                Save List
+              </button>
+              <button className="btn btn-primary" onClick={handleViewOrder}>
+                View List
+              </button>
+            </div>
+          </form>
         </div>
         {!viewOrderMenu && saveConfirmation && (
           <div className="save-confirmation">Successfully Saved!</div>

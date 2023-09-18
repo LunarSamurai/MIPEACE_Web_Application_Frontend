@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Switch, Route, Redirect, useLocation } from 'r
 import TestInstance from './TestInstance.js';
 import AdminInstance from './AdminInstance.js';
 import TestWebpage from './TestWebpage.js';
+import WorkingMemoryExam from './WorkingMemoryExam.js';
 import AdminWebpage from './AdminWebpage.js';
 import './App.css';  // Importing the styles
 import MIPEACE_Logo from './MIPEACE_LOGO.png'
@@ -131,6 +132,9 @@ function App() {
           </Route>
           <Route path="/admin">
             <AdminWebpage />
+          </Route>
+          <Route path="/WMExam">
+            <WorkingMemoryExam />
           </Route>
         </Switch>
       </Router>

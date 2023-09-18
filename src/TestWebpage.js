@@ -17,12 +17,21 @@ function TestPage() {
   const history = useHistory();
   const { isRandomizeEnabled, setIsRandomizeEnabled } = useContext(TestPageContext);
 
-  const responseIDMap = {
+  const responsePositiveIDMap = {
     'Strongly Disagree': 5,
     'Disagree': 4,
     'Neither': 3,
     'Agree': 2,
     'Strongly Agree': 1,
+    'Skip': 0,
+  };
+
+  const responseNegativeIDMap = {
+    'Strongly Disagree': 1,
+    'Disagree': 2,
+    'Neither': 3,
+    'Agree': 4,
+    'Strongly Agree': 5,
     'Skip': 0,
   };
 
@@ -126,7 +135,7 @@ function fetchTestFile(textFileName) {
       positiveOrNegative,
       answer,
       selectedChoice, // Save the selected choice in the record
-      responseID: responseIDMap[answer], // Add the response ID based on the answer
+      responseID: responseNegativeIDMap[answer] || responsePositiveIDMap[answer], // Add the response ID based on the answer
     };
     setQuestionRecords((prevRecords) => [...prevRecords, record]);
     console.log(record);

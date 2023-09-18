@@ -60,35 +60,6 @@ function AdminInstance() {
     // Examinee List Modal
     const [showExamineeListModal, setExamineeListModal] =  useState(false);
 
-    useEffect(() => {
-      // Define the function to fetch the file list
-      const fetchFilesPeriodically = () => {
-        // If the user is interacting with the dropdown, skip the update
-        if (isInteractingRef.current) return;
-    
-        fetch('http://localhost:8080/api/get-file-names')
-            .then((response) => response.json())
-            .then((data) => {
-                // Directly update the state with fetched data
-                setTests(data);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-      };    
-      
-      // Call the function immediately to fetch the file list
-      fetchFilesPeriodically();
-    
-      // Set up an interval to fetch the file list every 10 seconds (or any desired duration)
-      const intervalId = setInterval(fetchFilesPeriodically, 10000);
-    
-      // Clear the interval when the component is unmounted
-      return () => {
-          clearInterval(intervalId);
-        };
-      }, []);
-
     const handleExamineeListNavigationClick = () => {
       setActiveItem('ExamineeList');
       setShowMainAdminGridModal(false); 
@@ -278,6 +249,11 @@ function AdminInstance() {
             console.log('No file selected.');
         }
       };
+
+    const handleWMExamClick = (event) => {
+      event.preventDefault();
+      localStorage.setItem('testWMExam', "true");
+    }
 
     const handleRemoveButtonClick = (event) => {
         event.preventDefault();
@@ -474,7 +450,11 @@ function AdminInstance() {
         if (localStorage.getItem('adminLoggedOut') === "true") {
             return <Redirect to="/" />
         }
-        
+        if (localStorage.getItem('testWMExam') === "true"){
+            return <Redirect to="/WMExam"/>
+        }
+
+        console.log("AdminInstance is rendering");
         const renderUploadContainer = () => {
             if (showUploadContainer) {
               return (
@@ -713,6 +693,8 @@ function AdminInstance() {
                                     <p>Press here to begin the Exam for examinees.</p>
                                     <p2>{isExamEnabled ? 'Enabled' : 'Disabled'}</p2>
                                 </div>
+                                <button className = "test-wm-exam" onClick={handleWMExamClick}>
+                              </button>
                             </div>
                         </div>
                     )}
@@ -727,17 +709,15 @@ function AdminInstance() {
 
     return (
       <div className="AdminInstance">
-        {isAdmin ? (
-          !showAdminLogin ? (
+        {
+          isAdmin && !showAdminLogin ? (
             <AdminControlPanel />
-          ) : null
-        ) : (
-          showAdminLogin ? (
+          ) : showAdminLogin ? (
             <div className="admin-login-wrapper" style={{ background: 'white' }}>
               {renderAdminLogin()}
             </div>
           ) : null
-        )}
+        }
         <TestPageContext.Provider value={{ isRandomizeEnabled, setIsRandomizeEnabled }}>
           {/* You can have other components here that use the context */}
         </TestPageContext.Provider>
